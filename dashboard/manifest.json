@@ -1,14 +1,14 @@
 {
-  "name": "monitoring",
-  "label": "Monitoring",
-  "description": "Monitor background website pings and view live statuses.",
-  "icon": "Activity",
-  "version": "1.0.0",
-  "tab": {
-    "path": "/monitoring",
-    "position": "after:skills"
-  },
-  "slots": [],
-  "entry": "dist/index.js",
-  "api": "plugin_api.py"
+    "name": "monitoring",
+    "label": "Monitoring",
+    "description": "Monitor web service and proxy uptime with real time alerts.",
+    "icon": "Activity",
+    "version": "1.0.0",
+    "tab": {
+        "path": "/monitoring",
+        "position": "after:skills"
+    },
+    "slots": [],
+    "entry": "dist/index.js",
+    "api": "plugin_api.py"
 }

@@ -1,17 +1,24 @@
-"""Website Monitor Dashboard Backend API routes.
-Mounted at /api/plugins/website-monitor/ by the plugin system.
-"""
-
+# Standard Imports
 import json
-from pathlib import Path
-from fastapi import APIRouter, Query, Request
-from hermes_cli.config import get_hermes_home
-from typing import Dict, Any
 
+# External Imports
+from fastapi import APIRouter
+
+# Hermes Imports
+from hermes_cli.config import get_hermes_home
+
+
+# Router
 router = APIRouter()
 
 
-def _get_config_path() -> Path:
+
+# website_monitors.json location and lock location, overview section looks, this file, index, then dashboard done
+
+
+
+
+def _get_config_path():
     return get_hermes_home() / "website_monitors.json"
 
 
@@ -68,7 +75,7 @@ async def status():
 
 
 @router.post("/add")
-async def addshit(request: Request) -> Dict[str, Any]:
+async def addshit(request):
     body = await request.json()
 
     monitor_type = body.get("type", "website")
@@ -136,7 +143,7 @@ async def addshit(request: Request) -> Dict[str, Any]:
 
 
 @router.post("/remove")
-async def remove(request: Request):
+async def remove(request):
     """Remove a URL or monitor ID from monitoring."""
 
     body = await request.json()

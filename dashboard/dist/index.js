@@ -237,7 +237,7 @@
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
                     React.createElement("div", { className: "flex items-center justify-between" },
-                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "📊 Uptime Overview"),
+                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "Overview"),
                         React.createElement(Button, {
                             onClick: getMonitors,
                             disabled: loading,
@@ -458,5 +458,3 @@
 })();
 
 
-
-// change from uptime to monitoring
