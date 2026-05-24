@@ -217,21 +217,24 @@
 function renderOverviewStat(label, value, colourClass, bgClass) {
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-2xl border px-7 py-6 shadow-sm backdrop-blur-sm " +
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-lg overflow-hidden relative " +
             bgClass
     },
+
         React.createElement("div", {
-            className: "flex items-center justify-around gap-6"
+            className: "flex items-center justify-between gap-10"
         },
+
             React.createElement("div", {
-                className: "flex flex-col"
+                className: "flex flex-col z-10"
             },
+
                 React.createElement("span", {
-                    className: "text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground"
+                    className: "text-xs font-black uppercase tracking-[0.3em] text-white/60"
                 }, label),
 
                 React.createElement("span", {
-                    className: "text-sm text-muted-foreground mt-2"
+                    className: "text-sm text-white/50 mt-3"
                 },
                     label === "Total"
                         ? "Tracked services"
@@ -243,15 +246,24 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
                 )
             ),
 
-            React.createElement("span", {
-                className: "font-black leading-none " + colourClass,
-                style: {
-                    fontSize: "96px",
-                    lineHeight: "0.85",
-                    letterSpacing: "-0.08em"
-                }
-            }, value)
-        )
+            React.createElement("div", {
+                className: "pr-3 flex items-center justify-center z-10"
+            },
+
+                React.createElement("span", {
+                    className: "font-black leading-none " + colourClass,
+                    style: {
+                        fontSize: "96px",
+                        lineHeight: "0.85",
+                        letterSpacing: "-0.08em"
+                    }
+                }, value)
+            )
+        ),
+
+        React.createElement("div", {
+            className: "absolute inset-0 opacity-30 pointer-events-none"
+        })
     );
 }
 
