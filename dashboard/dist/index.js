@@ -214,23 +214,31 @@
 
         const appNames = Object.keys(groupedMonitors).sort();
 
-        function renderOverviewCard(label, value, subtext, colourClass) {
-            return React.createElement("div", {
-                className: "rounded-lg border border-border bg-background/40 p-4 flex flex-col gap-1"
-            },
-                React.createElement("span", {
-                    className: "text-xs text-muted-foreground"
-                }, label),
+function renderOverviewCard(label, value, subtext, colourClass, bgClass, icon) {
+    return React.createElement("div", {
+        className: "relative overflow-hidden rounded-xl border border-border p-5 flex flex-col gap-2 shadow-sm " + (bgClass || "bg-background/40")
+    },
+        React.createElement("div", {
+            className: "flex items-center justify-between"
+        },
+            React.createElement("span", {
+                className: "text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+            }, label),
 
-                React.createElement("span", {
-                    className: "text-2xl font-bold " + (colourClass || "")
-                }, value),
+            React.createElement("span", {
+                className: "text-2xl"
+            }, icon)
+        ),
 
-                React.createElement("span", {
-                    className: "text-xs text-muted-foreground"
-                }, subtext)
-            );
-        }
+        React.createElement("span", {
+            className: "text-4xl font-black leading-none " + (colourClass || "")
+        }, value),
+
+        React.createElement("span", {
+            className: "text-xs text-muted-foreground"
+        }, subtext)
+    );
+}
 
         return React.createElement("div", { className: "flex flex-col gap-6 p-4" },
 
@@ -247,26 +255,61 @@
                 ),
 
                 React.createElement(CardContent, { className: "flex flex-col gap-4" },
-                    React.createElement("div", {
-                        className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"
-                    },
-                        renderOverviewCard("Total Services", overviewStats.total, "All monitored services"),
-                        renderOverviewCard("Online", overviewStats.up, "Services currently up", "text-green-500"),
-                        renderOverviewCard("Down", overviewStats.down, "Services currently down", "text-red-500"),
-                        renderOverviewCard("Unknown", overviewStats.unknown, "Waiting for first result", "text-yellow-500")
-                    ),
+React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+},
+    renderOverviewCard(
+        "Total Services",
+        overviewStats.total,
+        "Being monitored",
+        "text-blue-500",
+        "bg-blue-500/10 border-blue-500/30",
+        "🛰️"
+    ),
 
-                    React.createElement("div", {
-                        className: "rounded-md border border-border bg-background/40 px-4 py-3 text-sm font-medium"
-                    },
-                        overviewStats.total === 0
-                            ? "No services are being monitored yet."
-                            : overviewStats.down > 0
-                                ? "⚠️ " + overviewStats.down + " service" + (overviewStats.down === 1 ? " is" : "s are") + " currently down."
-                                : overviewStats.unknown > 0
-                                    ? "🟡 No services are down, but " + overviewStats.unknown + " service" + (overviewStats.unknown === 1 ? " has" : "s have") + " unknown status."
-                                    : "✅ All services are operational."
-                    )
+    renderOverviewCard(
+        "Online",
+        overviewStats.up,
+        "Healthy services",
+        "text-green-500",
+        "bg-green-500/10 border-green-500/30",
+        "✅"
+    ),
+
+    renderOverviewCard(
+        "Down",
+        overviewStats.down,
+        "Needs attention",
+        "text-red-500",
+        "bg-red-500/10 border-red-500/30",
+        "🚨"
+    ),
+
+    renderOverviewCard(
+        "Unknown",
+        overviewStats.unknown,
+        "Waiting for data",
+        "text-yellow-500",
+        "bg-yellow-500/10 border-yellow-500/30",
+        "🟡"
+    )
+),
+
+React.createElement("div", {
+    className: overviewStats.down > 0
+        ? "rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-base font-bold text-red-500"
+        : overviewStats.unknown > 0
+            ? "rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-5 py-4 text-base font-bold text-yellow-500"
+            : "rounded-xl border border-green-500/30 bg-green-500/10 px-5 py-4 text-base font-bold text-green-500"
+},
+    overviewStats.total === 0
+        ? "No services are being monitored yet."
+        : overviewStats.down > 0
+            ? "🚨 " + overviewStats.down + " active incident" + (overviewStats.down === 1 ? "" : "s") + " right now."
+            : overviewStats.unknown > 0
+                ? "🟡 No confirmed outages, but " + overviewStats.unknown + " service" + (overviewStats.unknown === 1 ? " is" : "s are") + " still unknown."
+                : "✅ All systems operational."
+)
                 )
             ),
 
