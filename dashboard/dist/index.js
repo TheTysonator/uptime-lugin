@@ -454,7 +454,7 @@
         );
     }
 
-    window.__HERMES_PLUGINS__.register("uptime", PluginPage);
+    window.__HERMES_PLUGINS__.register("monitoring", PluginPage);
 })();
 
 
