@@ -220,15 +220,12 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
             "flex-1 min-w-[260px] rounded-2xl border px-7 py-6 shadow-sm backdrop-blur-sm " +
             bgClass
     },
-
         React.createElement("div", {
             className: "flex items-center justify-between gap-6"
         },
-
             React.createElement("div", {
                 className: "flex flex-col"
             },
-
                 React.createElement("span", {
                     className: "text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground"
                 }, label),
@@ -247,9 +244,12 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
             ),
 
             React.createElement("span", {
-                className:
-                    "text-7xl md:text-8xl lg:text-9xl font-black tracking-[-0.06em] leading-none " +
-                    colourClass
+                className: "font-black leading-none " + colourClass,
+                style: {
+                    fontSize: "96px",
+                    lineHeight: "0.85",
+                    letterSpacing: "-0.08em"
+                }
             }, value)
         )
     );
