@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import APIRouter, Query, Request
 # 🟢 CORRECT CANONICAL IMPORT FOR DASHBOARD ROUTING
 from hermes_cli.config import get_hermes_home
+from typing import Dict, Any
 
 router = APIRouter()
 
@@ -51,10 +52,10 @@ async def add(url: str = Query(...)):
 
 
 @router.post("/test")
-async def add(request: Request):
+async def add(request: Request) -> Dict[str, Any]:
     body = await request.json()
-    print("Received test request with body: ", body)
-    return {"success": True, "message": body.value}
+    print("Received test request with body: ", body.get("value"))
+    return {"success": True, "message": body.get("value")}
 
 
 @router.get("/remove")
