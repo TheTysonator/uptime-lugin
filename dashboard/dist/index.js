@@ -42,7 +42,7 @@
                     app: newMonitorApplication,
                     configuration: newMonitorConfiguration
                 })
-            }).then( data => {
+            }).then(data => {
                 if (data && data.success) {
                     setMessage("Successfully added " + newMonitorName);
                     setNewMonitorName("");
@@ -53,12 +53,13 @@
                 } else {
                     setMessage("Error: " + (data ? data.error : "Unknown Error"));
                 }
-            }).catch( err => {
+            }).catch(err => {
                 setMessage("API request failed: " + (err ? err.message : String(err)));
-            }).finally( () => {
+            }).finally(() => {
                 setLoading(false);
             });
         };
+
 
 
         // view/delete, view history/ping, overall
@@ -132,6 +133,59 @@
 
         function getMonitorType(monitorInfo) {
             return (monitorInfo && monitorInfo.type) ? monitorInfo.type : "website";
+        }
+
+        function getPingHistory(monitorInfo) {
+            const history = monitorInfo && Array.isArray(monitorInfo.ping_history) ? monitorInfo.ping_history : [];
+            return history.slice(-30);
+        }
+
+        function renderLatencyGraph(pingHistory) {
+            const graphWidth = 300;
+            const graphHeight = 60;
+            const validPings = pingHistory.filter(function (value) {
+                return typeof value === "number" && value >= 0;
+            });
+
+            const maxPing = validPings.length > 0 ? Math.max.apply(null, validPings) : 100;
+            const safeMaxPing = maxPing <= 0 ? 100 : maxPing;
+
+            const points = pingHistory.map(function (ping, index) {
+                const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
+                const value = typeof ping === "number" && ping >= 0 ? ping : 0;
+                const y = graphHeight - ((value / safeMaxPing) * graphHeight);
+                return x + "," + y;
+            }).join(" ");
+
+            return React.createElement("div", {
+                className: "mt-3 w-full"
+            },
+                React.createElement("div", {
+                    className: "flex items-center justify-between mb-1"
+                },
+                    React.createElement("span", {
+                        className: "text-[10px] text-muted-foreground uppercase tracking-wide"
+                    }, "Latency history"),
+
+                    React.createElement("span", {
+                        className: "text-[10px] text-muted-foreground"
+                    }, validPings.length > 0 ? Math.round(validPings[validPings.length - 1]) + "ms" : "No data")
+                ),
+
+                React.createElement("svg", {
+                    viewBox: "0 0 " + graphWidth + " " + graphHeight,
+                    preserveAspectRatio: "none",
+                    className: "w-full h-16 border border-border rounded-md bg-background/40"
+                },
+                    React.createElement("polyline", {
+                        points: points,
+                        fill: "none",
+                        stroke: "currentColor",
+                        strokeWidth: "2",
+                        className: "text-primary"
+                    })
+                )
+            );
         }
 
         const monitorsSafe = monitors || {};
@@ -282,50 +336,58 @@
                                             const typeLabel = monitorType === "proxy" ? "Proxy" : "Website";
                                             const typeIcon = monitorType === "proxy" ? "🧦" : "🌐";
 
+                                            const pingHistory = getPingHistory(monitorInfo);
+
                                             return React.createElement("div", {
                                                 key: monitorId,
-                                                className: "flex items-center justify-between px-4 py-4"
+                                                className: "flex flex-col px-4 py-4"
                                             },
                                                 React.createElement("div", {
-                                                    className: "flex flex-col gap-1 pr-4 min-w-0"
+                                                    className: "flex items-center justify-between"
                                                 },
                                                     React.createElement("div", {
-                                                        className: "flex items-center gap-2 min-w-0"
+                                                        className: "flex flex-col gap-1 pr-4 min-w-0"
                                                     },
-                                                        React.createElement("span", {
-                                                            className: "text-sm font-semibold truncate"
-                                                        }, monitorName),
+                                                        React.createElement("div", {
+                                                            className: "flex items-center gap-2 min-w-0"
+                                                        },
+                                                            React.createElement("span", {
+                                                                className: "text-sm font-semibold truncate"
+                                                            }, monitorName),
 
-                                                        React.createElement(Badge, {
-                                                            variant: "secondary",
-                                                            className: "text-[10px] px-2 py-0.5 shrink-0"
-                                                        }, typeIcon + " " + typeLabel)
+                                                            React.createElement(Badge, {
+                                                                variant: "secondary",
+                                                                className: "text-[10px] px-2 py-0.5 shrink-0"
+                                                            }, typeIcon + " " + typeLabel)
+                                                        ),
+
+                                                        React.createElement("span", {
+                                                            className: "text-xs text-muted-foreground truncate"
+                                                        }, monitorId),
+
+                                                        React.createElement("span", {
+                                                            className: "text-xs text-muted-foreground"
+                                                        }, "Polling status every 60 seconds")
                                                     ),
 
-                                                    React.createElement("span", {
-                                                        className: "text-xs text-muted-foreground truncate"
-                                                    }, monitorId),
+                                                    React.createElement("div", {
+                                                        className: "flex items-center gap-4 shrink-0"
+                                                    },
+                                                        React.createElement(Badge, {
+                                                            variant: badgeVariant,
+                                                            className: "text-xs px-2 py-0.5"
+                                                        }, badgeText),
 
-                                                    React.createElement("span", {
-                                                        className: "text-xs text-muted-foreground"
-                                                    }, "Polling status every 60 seconds")
-                                                ),
+                                                        React.createElement(Button, {
+                                                            onClick: function () {
+                                                                handleRemove(monitorId);
+                                                            },
+                                                            disabled: loading,
+                                                            className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
+                                                        }, "🗑 Delete"),
 
-                                                React.createElement("div", {
-                                                    className: "flex items-center gap-4 shrink-0"
-                                                },
-                                                    React.createElement(Badge, {
-                                                        variant: badgeVariant,
-                                                        className: "text-xs px-2 py-0.5"
-                                                    }, badgeText),
-
-                                                    React.createElement(Button, {
-                                                        onClick: function () {
-                                                            handleRemove(monitorId);
-                                                        },
-                                                        disabled: loading,
-                                                        className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
-                                                    }, "🗑 Delete")
+                                                        renderLatencyGraph(pingHistory)
+                                                    )
                                                 )
                                             );
                                         })

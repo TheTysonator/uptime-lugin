@@ -33,8 +33,33 @@ def _save_monitors(monitors: dict) -> None:
 
 @router.get("/status")
 async def status():
-    """Returns the list of monitored URLs and their last status."""
-    return {"success": True, "monitors": _load_monitors()}
+    """Returns monitors with normalized 30-point ping history."""
+
+    monitors = _load_monitors()
+
+    for monitor_id, monitor_data in monitors.items():
+
+        # Ensure ping_history exists
+        ping_history = monitor_data.get("ping_history", [])
+
+        # Ensure it's a list
+        if not isinstance(ping_history, list):
+            ping_history = []
+
+        # Keep only last 30 values
+        ping_history = ping_history[-30:]
+
+        # Pad missing values with -1
+        while len(ping_history) < 30:
+            ping_history.insert(0, -1)
+
+        # Save normalized history back
+        monitor_data["ping_history"] = ping_history
+
+    return {
+        "success": True,
+        "monitors": monitors
+    }
 
 
 
