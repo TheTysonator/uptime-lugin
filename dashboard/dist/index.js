@@ -214,31 +214,19 @@
 
         const appNames = Object.keys(groupedMonitors).sort();
 
-function renderOverviewCard(label, value, subtext, colourClass, bgClass, icon) {
-    return React.createElement("div", {
-        className: "relative overflow-hidden rounded-xl border border-border p-5 flex flex-col gap-2 shadow-sm " + (bgClass || "bg-background/40")
-    },
-        React.createElement("div", {
-            className: "flex items-center justify-between"
-        },
-            React.createElement("span", {
-                className: "text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-            }, label),
+        function renderOverviewStat(label, value, colourClass) {
+            return React.createElement("div", {
+                className: "flex flex-col gap-1"
+            },
+                React.createElement("span", {
+                    className: "text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                }, label),
 
-            React.createElement("span", {
-                className: "text-2xl"
-            }, icon)
-        ),
-
-        React.createElement("span", {
-            className: "text-4xl font-black leading-none " + (colourClass || "")
-        }, value),
-
-        React.createElement("span", {
-            className: "text-xs text-muted-foreground"
-        }, subtext)
-    );
-}
+                React.createElement("span", {
+                    className: "text-4xl md:text-5xl font-black leading-none " + (colourClass || "")
+                }, value)
+            );
+        }
 
         return React.createElement("div", { className: "flex flex-col gap-6 p-4" },
 
@@ -250,73 +238,74 @@ function renderOverviewCard(label, value, subtext, colourClass, bgClass, icon) {
                             onClick: getMonitors,
                             disabled: loading,
                             className: "text-xs border border-border px-3 py-1 cursor-pointer"
-                        }, loading ? "Refreshing..." : "↻ Refresh")
+                        }, loading ? "Refreshing..." : "Refresh")
                     )
                 ),
 
-                React.createElement(CardContent, { className: "flex flex-col gap-4" },
-React.createElement("div", {
-    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-},
-    renderOverviewCard(
-        "Total Services",
-        overviewStats.total,
-        "Being monitored",
-        "text-blue-500",
-        "bg-blue-500/10 border-blue-500/30",
-        "🛰️"
-    ),
+                React.createElement(CardContent, { className: "flex flex-col gap-5" },
+                    React.createElement("div", {
+                        className: overviewStats.down > 0
+                            ? "rounded-2xl border border-red-500/30 bg-red-500/10 p-6"
+                            : overviewStats.unknown > 0
+                                ? "rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-6"
+                                : "rounded-2xl border border-green-500/30 bg-green-500/10 p-6"
+                    },
+                        React.createElement("div", {
+                            className: "flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+                        },
+                            React.createElement("div", {
+                                className: "flex flex-col gap-2"
+                            },
+                                React.createElement("span", {
+                                    className: "text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                                }, "Current Status"),
 
-    renderOverviewCard(
-        "Online",
-        overviewStats.up,
-        "Healthy services",
-        "text-green-500",
-        "bg-green-500/10 border-green-500/30",
-        "✅"
-    ),
+                                React.createElement("span", {
+                                    className: overviewStats.down > 0
+                                        ? "text-3xl md:text-4xl font-black text-red-500"
+                                        : overviewStats.unknown > 0
+                                            ? "text-3xl md:text-4xl font-black text-yellow-500"
+                                            : "text-3xl md:text-4xl font-black text-green-500"
+                                },
+                                    overviewStats.total === 0
+                                        ? "No services monitored"
+                                        : overviewStats.down > 0
+                                            ? overviewStats.down + " active incident" + (overviewStats.down === 1 ? "" : "s")
+                                            : overviewStats.unknown > 0
+                                                ? overviewStats.unknown + " unknown status" + (overviewStats.unknown === 1 ? "" : "es")
+                                                : "All systems operational"
+                                ),
 
-    renderOverviewCard(
-        "Down",
-        overviewStats.down,
-        "Needs attention",
-        "text-red-500",
-        "bg-red-500/10 border-red-500/30",
-        "🚨"
-    ),
+                                React.createElement("span", {
+                                    className: "text-sm text-muted-foreground"
+                                },
+                                    overviewStats.total === 0
+                                        ? "Add a monitor below to start tracking service health."
+                                        : overviewStats.down > 0
+                                            ? "One or more monitored services need attention."
+                                            : overviewStats.unknown > 0
+                                                ? "No confirmed outages, but some services have not reported a known state yet."
+                                                : "Every monitored service is currently reporting healthy."
+                                )
+                            ),
 
-    renderOverviewCard(
-        "Unknown",
-        overviewStats.unknown,
-        "Waiting for data",
-        "text-yellow-500",
-        "bg-yellow-500/10 border-yellow-500/30",
-        "🟡"
-    )
-),
-
-React.createElement("div", {
-    className: overviewStats.down > 0
-        ? "rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-base font-bold text-red-500"
-        : overviewStats.unknown > 0
-            ? "rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-5 py-4 text-base font-bold text-yellow-500"
-            : "rounded-xl border border-green-500/30 bg-green-500/10 px-5 py-4 text-base font-bold text-green-500"
-},
-    overviewStats.total === 0
-        ? "No services are being monitored yet."
-        : overviewStats.down > 0
-            ? "🚨 " + overviewStats.down + " active incident" + (overviewStats.down === 1 ? "" : "s") + " right now."
-            : overviewStats.unknown > 0
-                ? "🟡 No confirmed outages, but " + overviewStats.unknown + " service" + (overviewStats.unknown === 1 ? " is" : "s are") + " still unknown."
-                : "✅ All systems operational."
-)
+                            React.createElement("div", {
+                                className: "grid grid-cols-2 md:grid-cols-4 gap-6 lg:min-w-[520px]"
+                            },
+                                renderOverviewStat("Total", overviewStats.total, "text-blue-500"),
+                                renderOverviewStat("Online", overviewStats.up, "text-green-500"),
+                                renderOverviewStat("Down", overviewStats.down, "text-red-500"),
+                                renderOverviewStat("Unknown", overviewStats.unknown, "text-yellow-500")
+                            )
+                        )
+                    )
                 )
             ),
 
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
                     React.createElement("div", { className: "flex items-center justify-between" },
-                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "🌐 Website Uptime Monitor")
+                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "Website Uptime Monitor")
                     )
                 ),
 
@@ -382,7 +371,7 @@ React.createElement("div", {
 
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
-                    React.createElement(CardTitle, { className: "text-base font-semibold" }, "📺 Live Monitor Statuses")
+                    React.createElement(CardTitle, { className: "text-base font-semibold" }, "Live Monitor Statuses")
                 ),
 
                 React.createElement(CardContent, null,
@@ -422,11 +411,9 @@ React.createElement("div", {
                                             const isUp = status === "UP";
                                             const isDown = status === "DOWN";
                                             const badgeVariant = isUp ? "success" : (isDown ? "destructive" : "secondary");
-                                            const badgeText = isUp ? "● ONLINE" : (isDown ? "● DOWN" : "○ UNKNOWN");
+                                            const badgeText = isUp ? "ONLINE" : (isDown ? "DOWN" : "UNKNOWN");
 
                                             const typeLabel = monitorType === "proxy" ? "Proxy" : "Website";
-                                            const typeIcon = monitorType === "proxy" ? "🧦" : "🌐";
-
                                             const pingHistory = getPingHistory(monitorInfo);
 
                                             return React.createElement("div", {
@@ -449,7 +436,7 @@ React.createElement("div", {
                                                             React.createElement(Badge, {
                                                                 variant: "secondary",
                                                                 className: "text-[10px] px-2 py-0.5 shrink-0"
-                                                            }, typeIcon + " " + typeLabel)
+                                                            }, typeLabel)
                                                         ),
 
                                                         React.createElement("span", {
@@ -475,7 +462,7 @@ React.createElement("div", {
                                                             },
                                                             disabled: loading,
                                                             className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
-                                                        }, "🗑 Delete"),
+                                                        }, "Delete"),
 
                                                         renderLatencyGraph(pingHistory)
                                                     )
@@ -493,5 +480,3 @@ React.createElement("div", {
 
     window.__HERMES_PLUGINS__.register("monitoring", PluginPage);
 })();
-
-
