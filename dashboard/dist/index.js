@@ -52,7 +52,7 @@
 
 
 
-
+        /*
       SDK.fetchJSON("/api/plugins/uptime/add?url=" + encodeURIComponent(newMonitorConfiguration))
         .then(function (data) {
           if (data && data.success) {
@@ -69,6 +69,8 @@
         .finally(function () {
           setLoading(false);
         });
+
+        */
     }
 
 
