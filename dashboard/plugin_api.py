@@ -54,7 +54,7 @@ async def add(url: str = Query(...)):
 async def add(request):
     body = await request.json()
     print("Received test request with body: ", body)
-    return {"success": True, "message": f"Added example.com."}
+    return {"success": True, "message": body.value}
 
 
 @router.get("/remove")

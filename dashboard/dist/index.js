@@ -44,10 +44,10 @@
         })
       })
         .then(function (data) {
-          console.log("Test API response:", data);
+          setMessage("API request success: " + data.message);
         })
         .catch(function (err) {
-          console.error("Test API error:", err);
+          setMessage("API request failed: " + (err ? err.message : String(err)));
         });
 
 
