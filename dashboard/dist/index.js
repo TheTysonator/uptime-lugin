@@ -221,7 +221,7 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
             bgClass
     },
         React.createElement("div", {
-            className: "flex items-center justify-between gap-6"
+            className: "flex items-center justify-around gap-6"
         },
             React.createElement("div", {
                 className: "flex flex-col"
