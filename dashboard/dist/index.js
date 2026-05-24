@@ -214,27 +214,46 @@
 
         const appNames = Object.keys(groupedMonitors).sort();
 
-        function renderOverviewStat(label, value, colourClass, bgClass) {
-            return React.createElement("div", {
-                className:
-                    "flex-1 min-w-[180px] rounded-2xl border px-6 py-6 shadow-sm backdrop-blur-sm " +
-                    bgClass
-            },
-                React.createElement("div", {
-                    className: "flex flex-col gap-3"
-                },
-                    React.createElement("span", {
-                        className: "text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground"
-                    }, label),
+function renderOverviewStat(label, value, colourClass, bgClass) {
+    return React.createElement("div", {
+        className:
+            "flex-1 min-w-[260px] rounded-2xl border px-7 py-6 shadow-sm backdrop-blur-sm " +
+            bgClass
+    },
 
-                    React.createElement("span", {
-                        className:
-                            "text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none " +
-                            colourClass
-                    }, value)
+        React.createElement("div", {
+            className: "flex items-center justify-between gap-6"
+        },
+
+            React.createElement("div", {
+                className: "flex flex-col"
+            },
+
+                React.createElement("span", {
+                    className: "text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground"
+                }, label),
+
+                React.createElement("span", {
+                    className: "text-sm text-muted-foreground mt-2"
+                },
+                    label === "Total"
+                        ? "Tracked services"
+                        : label === "Online"
+                            ? "Healthy services"
+                            : label === "Down"
+                                ? "Active outages"
+                                : "Pending state"
                 )
-            );
-        }
+            ),
+
+            React.createElement("span", {
+                className:
+                    "text-7xl md:text-8xl lg:text-9xl font-black tracking-[-0.06em] leading-none " +
+                    colourClass
+            }, value)
+        )
+    );
+}
 
         return React.createElement("div", { className: "flex flex-col gap-6 p-4" },
 
