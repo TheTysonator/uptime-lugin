@@ -214,11 +214,24 @@
 
         const appNames = Object.keys(groupedMonitors).sort();
 
-function renderOverviewStat(label, value, colourClass, bgClass) {
+function renderOverviewStat(label, value, colourClass) {
+
+    let backgroundClass = "bg-zinc-900 border-zinc-800";
+
+    if (label === "Total") {
+        backgroundClass = "bg-cyan-950/80 border-cyan-700/40";
+    } else if (label === "Online") {
+        backgroundClass = "bg-emerald-950/80 border-emerald-700/40";
+    } else if (label === "Down") {
+        backgroundClass = "bg-rose-950/80 border-rose-700/40";
+    } else if (label === "Unknown") {
+        backgroundClass = "bg-amber-950/80 border-amber-700/40";
+    }
+
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-lg overflow-hidden relative " +
-            bgClass
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-lg overflow-hidden relative backdrop-blur-sm " +
+            backgroundClass
     },
 
         React.createElement("div", {
@@ -247,7 +260,7 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
             ),
 
             React.createElement("div", {
-                className: "pr-3 flex items-center justify-center z-10"
+                className: "pr-4 flex items-center justify-center z-10"
             },
 
                 React.createElement("span", {
@@ -259,11 +272,7 @@ function renderOverviewStat(label, value, colourClass, bgClass) {
                     }
                 }, value)
             )
-        ),
-
-        React.createElement("div", {
-            className: "absolute inset-0 opacity-30 pointer-events-none"
-        })
+        )
     );
 }
 
