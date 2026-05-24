@@ -86,50 +86,43 @@
             // Loading
             setLoading(true);
             // API Request
+            SDK.fetchJSON("/api/plugins/uptime/remove", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    url: monitorId
+                })
+            }).then( data => {
+                if ( data && data.success ) {
+                    setMessage("Removed " + monitorId);
+                    getMonitors();
+                } else {
+                    setMessage("Error: " + (data ? data.error : "Unknown Error"));
+                }
+            }).catch( err => {
+                setMessage("API request failed: " + (err ? err.message : String(err)));
+            }).finally( () => {
+                setLoading(false);
+            });
+        };
 
-
-
-
-SDK.fetchJSON("/api/plugins/uptime/remove", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        url: monitorId
-    })
-})
-    .then(function (data) {
-        if (data && data.success) {
-            setMessage("Removed " + monitorId);
+        // Use Effect
+        useEffect( () => {
+            // Get Monitors
             getMonitors();
-        } else {
-            setMessage("Error: " + (data ? data.error : "Unknown Error"));
-        }
-    })
-    .catch(function (err) {
-        setMessage("API request failed: " + (err ? err.message : String(err)));
-    })
-    .finally(function () {
-        setLoading(false);
-    });
-
-    
-        }
-
-
-
-// delete, chart hover and levels, overall, View up and down overall
-
-
-
-        useEffect(function () {
-            getMonitors();
+            // Preiodic Refresh
             const interval = setInterval(getMonitors, 15000);
-            return function () {
+            // Cleanup
+            return () => {
                 clearInterval(interval);
             };
-        }, []);
+        }, [] );
+
+
+
+// chart hover and levels and averages, overall, View up and down overall
 
 
 
@@ -150,53 +143,77 @@ SDK.fetchJSON("/api/plugins/uptime/remove", {
             return history.slice(-30);
         }
 
-        function renderLatencyGraph(pingHistory) {
-            const graphWidth = 300;
-            const graphHeight = 60;
-            const validPings = pingHistory.filter(function (value) {
-                return typeof value === "number" && value >= 0;
-            });
+function renderLatencyGraph(pingHistory) {
+    const graphWidth = 300;
+    const graphHeight = 60;
 
-            const maxPing = validPings.length > 0 ? Math.max.apply(null, validPings) : 100;
-            const safeMaxPing = maxPing <= 0 ? 100 : maxPing;
+    const validPings = pingHistory.filter(function (value) {
+        return typeof value === "number" && value >= 0;
+    });
 
-            const points = pingHistory.map(function (ping, index) {
+    const averagePing = validPings.length > 0
+        ? Math.round(validPings.reduce(function (sum, value) {
+            return sum + value;
+        }, 0) / validPings.length)
+        : null;
+
+    const maxPing = validPings.length > 0 ? Math.max.apply(null, validPings) : 100;
+    const safeMaxPing = maxPing <= 0 ? 100 : maxPing;
+
+    const points = pingHistory.map(function (ping, index) {
+        const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
+        const value = typeof ping === "number" && ping >= 0 ? ping : 0;
+        const y = graphHeight - ((value / safeMaxPing) * graphHeight);
+        return x + "," + y;
+    }).join(" ");
+
+    return React.createElement("div", {
+        className: "mt-3 w-full"
+    },
+        React.createElement("div", {
+            className: "flex items-center justify-between mb-1"
+        },
+            React.createElement("span", {
+                className: "text-[10px] text-muted-foreground uppercase tracking-wide"
+            }, "Latency history"),
+
+            React.createElement("span", {
+                className: "text-[10px] text-muted-foreground"
+            }, averagePing !== null ? "Avg " + averagePing + "ms" : "No data")
+        ),
+
+        React.createElement("svg", {
+            viewBox: "0 0 " + graphWidth + " " + graphHeight,
+            preserveAspectRatio: "none",
+            className: "w-full h-16 border border-border rounded-md bg-background/40"
+        },
+            React.createElement("polyline", {
+                points: points,
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                className: "text-primary"
+            }),
+
+            pingHistory.map(function (ping, index) {
+                if (typeof ping !== "number" || ping < 0) return null;
+
                 const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
-                const value = typeof ping === "number" && ping >= 0 ? ping : 0;
-                const y = graphHeight - ((value / safeMaxPing) * graphHeight);
-                return x + "," + y;
-            }).join(" ");
+                const y = graphHeight - ((ping / safeMaxPing) * graphHeight);
 
-            return React.createElement("div", {
-                className: "mt-3 w-full"
-            },
-                React.createElement("div", {
-                    className: "flex items-center justify-between mb-1"
+                return React.createElement("circle", {
+                    key: index,
+                    cx: x,
+                    cy: y,
+                    r: 4,
+                    className: "fill-primary opacity-0 hover:opacity-100 cursor-pointer"
                 },
-                    React.createElement("span", {
-                        className: "text-[10px] text-muted-foreground uppercase tracking-wide"
-                    }, "Latency history"),
-
-                    React.createElement("span", {
-                        className: "text-[10px] text-muted-foreground"
-                    }, validPings.length > 0 ? Math.round(validPings[validPings.length - 1]) + "ms" : "No data")
-                ),
-
-                React.createElement("svg", {
-                    viewBox: "0 0 " + graphWidth + " " + graphHeight,
-                    preserveAspectRatio: "none",
-                    className: "w-full h-16 border border-border rounded-md bg-background/40"
-                },
-                    React.createElement("polyline", {
-                        points: points,
-                        fill: "none",
-                        stroke: "currentColor",
-                        strokeWidth: "2",
-                        className: "text-primary"
-                    })
-                )
-            );
-        }
+                    React.createElement("title", null, ping + "ms")
+                );
+            })
+        )
+    );
+}
 
         const monitorsSafe = monitors || {};
 
@@ -394,12 +411,11 @@ SDK.fetchJSON("/api/plugins/uptime/remove", {
                                                             },
                                                             disabled: loading,
                                                             className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
-                                                        }, "🗑 Delete"),
-
-                                                        renderLatencyGraph(pingHistory)
+                                                        }, "🗑 Delete")
                                                     )
                                                 )
-                                            );
+                                            ),
+                                            renderLatencyGraph(pingHistory)
                                         })
                                     )
                                 );
