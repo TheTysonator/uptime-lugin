@@ -253,13 +253,7 @@
                         renderOverviewCard("Total Services", overviewStats.total, "All monitored services"),
                         renderOverviewCard("Online", overviewStats.up, "Services currently up", "text-green-500"),
                         renderOverviewCard("Down", overviewStats.down, "Services currently down", "text-red-500"),
-                        renderOverviewCard("Unknown", overviewStats.unknown, "Waiting for first result", "text-yellow-500"),
-                        renderOverviewCard(
-                            "Current Incidents",
-                            overviewStats.incidents,
-                            "Active service issues",
-                            overviewStats.incidents > 0 ? "text-red-500" : "text-green-500"
-                        )
+                        renderOverviewCard("Unknown", overviewStats.unknown, "Waiting for first result", "text-yellow-500")
                     ),
 
                     React.createElement("div", {
