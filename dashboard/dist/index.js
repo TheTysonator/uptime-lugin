@@ -49,7 +49,7 @@
                     setNewMonitorApplication("");
                     setNewMonitorType("website");
                     setNewMonitorConfiguration("");
-                    fetchStatus();
+                    getMonitors();
                 } else {
                     setMessage("Error: " + (data ? data.error : "Unknown Error"));
                 }
@@ -60,18 +60,16 @@
             });
         };
 
-
-
-        // view/delete, view history/ping, overall
-
-
-
-
-
-        function fetchStatus() {
+        // Get Monitors
+        function getMonitors () {
+            // Loading
             setLoading(true);
 
+
+
             SDK.fetchJSON("/api/plugins/uptime/status")
+
+            
                 .then(function (data) {
                     if (data && data.success) {
                         setMonitors(data.monitors || {});
@@ -92,10 +90,13 @@
 
 
 
+// delete, view history/ping, overall
+
+
 
         useEffect(function () {
-            fetchStatus();
-            const interval = setInterval(fetchStatus, 15000);
+            getMonitors();
+            const interval = setInterval(getMonitors, 15000);
             return function () {
                 clearInterval(interval);
             };
@@ -112,7 +113,7 @@
                 .then(function (data) {
                     if (data && data.success) {
                         setMessage("Removed " + monitorId);
-                        fetchStatus();
+                        getMonitors();
                     } else {
                         setMessage("Error: " + (data ? data.error : "Unknown Error"));
                     }
@@ -211,7 +212,7 @@
                     React.createElement("div", { className: "flex items-center justify-between" },
                         React.createElement(CardTitle, { className: "text-xl font-bold" }, "🌐 Website Uptime Monitor"),
                         React.createElement(Button, {
-                            onClick: fetchStatus,
+                            onClick: getMonitors,
                             disabled: loading,
                             className: "text-xs border border-border px-3 py-1 cursor-pointer"
                         }, loading ? "Refreshing..." : "↻ Refresh")

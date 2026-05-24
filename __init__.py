@@ -12,7 +12,7 @@ import threading
 import time
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from hermes_constants import get_hermes_home
 
@@ -55,7 +55,19 @@ def _save_monitors(monitors: Dict[str, Dict[str, Any]]) -> None:
         logger.error(f"Failed to write website monitors config: {e}")
 
 
-def _check_website(url: str) -> bool:
+def _record_ping(info: Dict[str, Any], latency_ms: int) -> None:
+    history = info.get("ping_history", [])
+
+    if not isinstance(history, list):
+        history = []
+
+    history.append(latency_ms)
+    info["ping_history"] = history[-30:]
+
+
+def _check_website(url: str) -> Tuple[bool, int]:
+    start_time = time.time()
+
     try:
         req = urllib.request.Request(
             url,
@@ -63,10 +75,11 @@ def _check_website(url: str) -> bool:
         )
 
         with urllib.request.urlopen(req, timeout=5) as response:
-            return 200 <= response.status < 300
+            latency_ms = int((time.time() - start_time) * 1000)
+            return 200 <= response.status < 300, latency_ms
 
     except Exception:
-        return False
+        return False, -1
 
 
 def _build_proxy_runtime_config(config: Dict[str, Any], socks_port: int) -> Dict[str, Any]:
@@ -95,7 +108,7 @@ def _build_proxy_runtime_config(config: Dict[str, Any], socks_port: int) -> Dict
     }
 
 
-def _check_proxy(name: str, config: Dict[str, Any]) -> bool:
+def _check_proxy(name: str, config: Dict[str, Any]) -> Tuple[bool, int]:
     test_url = config.get("test_url", "https://api.ipify.org")
     socks_port = int(config.get("socks_port", 12334))
 
@@ -133,9 +146,11 @@ def _check_proxy(name: str, config: Dict[str, Any]) -> bool:
             time.sleep(1)
         else:
             logger.error(f"Proxy monitor {name}: SOCKS port {socks_port} never opened")
-            return False
+            return False, -1
 
         time.sleep(2)
+
+        start_time = time.time()
 
         result = subprocess.run(
             [
@@ -161,19 +176,22 @@ def _check_proxy(name: str, config: Dict[str, Any]) -> bool:
             text=True,
         )
 
+        latency_ms = int((time.time() - start_time) * 1000)
+
         if result.returncode != 0:
             logger.error(f"Proxy monitor {name}: curl failed: {result.stderr.strip()}")
-            return False
+            return False, -1
 
         logger.info(
             f"Proxy monitor {name}: test succeeded via port {socks_port}: "
             f"{result.stdout.strip()[:120]}"
         )
-        return True
+
+        return True, latency_ms
 
     except Exception:
         logger.exception(f"Proxy monitor failed for {name}")
-        return False
+        return False, -1
 
     finally:
         if proc:
@@ -238,11 +256,13 @@ def _background_monitor_loop(ctx) -> None:
                 else:
                     monitor_type = info.get("type", "website")
 
+                latency_ms = -1
+
                 if monitor_type == "proxy":
                     name = info.get("name", monitor_id.replace("proxy:", ""))
                     config = info.get("config", {})
 
-                    is_up = _check_proxy(name, config)
+                    is_up, latency_ms = _check_proxy(name, config)
                     display_name = name
                     alert_title = "PROXY MONITOR ALERT"
 
@@ -251,7 +271,7 @@ def _background_monitor_loop(ctx) -> None:
                         logger.warning(f"Skipping invalid website monitor key: {monitor_id}")
                         continue
 
-                    is_up = _check_website(monitor_id)
+                    is_up, latency_ms = _check_website(monitor_id)
                     display_name = monitor_id
                     alert_title = "WEBSITE UPTIME MONITOR ALERT"
 
@@ -262,9 +282,11 @@ def _background_monitor_loop(ctx) -> None:
                 current_status = "UP" if is_up else "DOWN"
                 old_status = info.get("last_status", "UNKNOWN")
 
+                _record_ping(monitors[monitor_id], latency_ms)
+                changed = True
+
                 if current_status != old_status:
                     monitors[monitor_id]["last_status"] = current_status
-                    changed = True
 
                     logger.info(
                         f"Monitor status changed for {display_name}: "
