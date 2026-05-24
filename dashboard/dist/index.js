@@ -1,21 +1,14 @@
-
-
 (function () {
 
     "use strict";
 
-
-    // Software Development Kit
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;
     const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
     const { useState, useEffect } = SDK.hooks;
 
-
-    // Plugin Page
     function PluginPage() {
 
-        // Variables
         const [loading, setLoading] = useState(false);
         const [message, setMessage] = useState(null);
         const [monitors, setMonitors] = useState({});
@@ -24,13 +17,10 @@
         const [newMonitorType, setNewMonitorType] = useState("website");
         const [newMonitorConfiguration, setNewMonitorConfiguration] = useState("");
 
-        // Add Monitor
-        function addMonitor ( event ) {
-            // Prevent Default
+        function addMonitor(event) {
             event.preventDefault();
-            // Loading
             setLoading(true);
-            // API Request
+
             SDK.fetchJSON("/api/plugins/uptime/add", {
                 method: "POST",
                 headers: {
@@ -42,50 +32,61 @@
                     app: newMonitorApplication,
                     configuration: newMonitorConfiguration
                 })
-            }).then(data => {
-                if (data && data.success) {
-                    setMessage("Successfully added " + newMonitorName);
-                    setNewMonitorName("");
-                    setNewMonitorApplication("");
-                    setNewMonitorType("website");
-                    setNewMonitorConfiguration("");
-                    getMonitors();
-                } else {
-                    setMessage("Error: " + (data ? data.error : "Unknown Error"));
-                }
-            }).catch(err => {
-                setMessage("API request failed: " + (err ? err.message : String(err)));
-            }).finally(() => {
-                setLoading(false);
-            });
-        };
+            })
+                .then(function (data) {
+                    if (data && data.success) {
+                        setMessage("Successfully added " + newMonitorName);
+                        setNewMonitorName("");
+                        setNewMonitorApplication("");
+                        setNewMonitorType("website");
+                        setNewMonitorConfiguration("");
+                        getMonitors();
+                    } else {
+                        setMessage("Error: " + (data ? data.error : "Unknown Error"));
+                    }
+                })
+                .catch(function (err) {
+                    setMessage("API request failed: " + (err ? err.message : String(err)));
+                })
+                .finally(function () {
+                    setLoading(false);
+                });
+        }
 
-        // Get Monitors
-        function getMonitors () {
-            // Loading
+        function getMonitors() {
             setLoading(true);
-            // API Request
-            SDK.fetchJSON("/api/plugins/uptime/get").then( data => {
-                if ( data && data.success ) {
-                    setMonitors(data.monitors || {});
-                } else {
-                    setMessage("Failed to load: backend returned unsuccessful response.");
-                }
-            }).catch( err => {
-                setMessage("Failed to load monitors: " + err ? (err.message || String(err)) : "Unknown Exception");
-                console.error("Website Monitor load error:", err);
-            }).finally( () => {
-                setLoading(false);
-            });
-        };
 
-        // Remove Monitor
-        function removeMonitor ( monitorId ) {
-            // Confirmation
-            if (!confirm("Are you sure you want to stop monitoring " + monitorId + "?")) return;
-            // Loading
+            SDK.fetchJSON("/api/plugins/uptime/status")
+                .then(function (data) {
+                    if (data && data.success) {
+                        setMonitors(data.monitors || {});
+                    } else {
+                        setMessage("Failed to load: backend returned unsuccessful response.");
+                    }
+                })
+                .catch(function (err) {
+                    const errMsg = err ? (err.message || String(err)) : "Unknown Exception";
+                    setMessage("Failed to load monitors: " + errMsg);
+                    console.error("Website Monitor load error:", err);
+                })
+                .finally(function () {
+                    setLoading(false);
+                });
+        }
+
+        useEffect(function () {
+            getMonitors();
+
+            const interval = setInterval(getMonitors, 15000);
+
+            return function () {
+                clearInterval(interval);
+            };
+        }, []);
+
+        function removeMonitor(monitorId) {
             setLoading(true);
-            // API Request
+
             SDK.fetchJSON("/api/plugins/uptime/remove", {
                 method: "POST",
                 headers: {
@@ -94,39 +95,22 @@
                 body: JSON.stringify({
                     url: monitorId
                 })
-            }).then( data => {
-                if ( data && data.success ) {
-                    setMessage("Removed " + monitorId);
-                    getMonitors();
-                } else {
-                    setMessage("Error: " + (data ? data.error : "Unknown Error"));
-                }
-            }).catch( err => {
-                setMessage("API request failed: " + (err ? err.message : String(err)));
-            }).finally( () => {
-                setLoading(false);
-            });
-        };
-
-        // Use Effect
-        useEffect( () => {
-            // Get Monitors
-            getMonitors();
-            // Preiodic Refresh
-            const interval = setInterval(getMonitors, 15000);
-            // Cleanup
-            return () => {
-                clearInterval(interval);
-            };
-        }, [] );
-
-
-
-// chart hover and levels and averages, overall, View up and down overall
-
-
-
-
+            })
+                .then(function (data) {
+                    if (data && data.success) {
+                        setMessage("Removed " + monitorId);
+                        getMonitors();
+                    } else {
+                        setMessage("Error: " + (data ? data.error : "Unknown Error"));
+                    }
+                })
+                .catch(function (err) {
+                    setMessage("API request failed: " + (err ? err.message : String(err)));
+                })
+                .finally(function () {
+                    setLoading(false);
+                });
+        }
 
         function getMonitorName(monitorId, monitorInfo) {
             if (monitorInfo && monitorInfo.name) return monitorInfo.name;
@@ -143,77 +127,82 @@
             return history.slice(-30);
         }
 
-function renderLatencyGraph(pingHistory) {
-    const graphWidth = 300;
-    const graphHeight = 60;
+        function renderLatencyGraph(pingHistory) {
+            const graphWidth = 300;
+            const graphHeight = 42;
 
-    const validPings = pingHistory.filter(function (value) {
-        return typeof value === "number" && value >= 0;
-    });
+            const validPings = pingHistory.filter(function (value) {
+                return typeof value === "number" && value >= 0;
+            });
 
-    const averagePing = validPings.length > 0
-        ? Math.round(validPings.reduce(function (sum, value) {
-            return sum + value;
-        }, 0) / validPings.length)
-        : null;
+            const averagePing = validPings.length > 0
+                ? Math.round(validPings.reduce(function (sum, value) {
+                    return sum + value;
+                }, 0) / validPings.length)
+                : null;
 
-    const maxPing = validPings.length > 0 ? Math.max.apply(null, validPings) : 100;
-    const safeMaxPing = maxPing <= 0 ? 100 : maxPing;
+            const latestPing = validPings.length > 0 ? validPings[validPings.length - 1] : null;
 
-    const points = pingHistory.map(function (ping, index) {
-        const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
-        const value = typeof ping === "number" && ping >= 0 ? ping : 0;
-        const y = graphHeight - ((value / safeMaxPing) * graphHeight);
-        return x + "," + y;
-    }).join(" ");
+            const maxPing = validPings.length > 0 ? Math.max.apply(null, validPings) : 100;
+            const safeMaxPing = maxPing <= 0 ? 100 : maxPing;
 
-    return React.createElement("div", {
-        className: "mt-3 w-full"
-    },
-        React.createElement("div", {
-            className: "flex items-center justify-between mb-1"
-        },
-            React.createElement("span", {
-                className: "text-[10px] text-muted-foreground uppercase tracking-wide"
-            }, "Latency history"),
-
-            React.createElement("span", {
-                className: "text-[10px] text-muted-foreground"
-            }, averagePing !== null ? "Avg " + averagePing + "ms" : "No data")
-        ),
-
-        React.createElement("svg", {
-            viewBox: "0 0 " + graphWidth + " " + graphHeight,
-            preserveAspectRatio: "none",
-            className: "w-full h-16 border border-border rounded-md bg-background/40"
-        },
-            React.createElement("polyline", {
-                points: points,
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "2",
-                className: "text-primary"
-            }),
-
-            pingHistory.map(function (ping, index) {
-                if (typeof ping !== "number" || ping < 0) return null;
-
+            const points = pingHistory.map(function (ping, index) {
                 const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
-                const y = graphHeight - ((ping / safeMaxPing) * graphHeight);
+                const value = typeof ping === "number" && ping >= 0 ? ping : 0;
+                const y = graphHeight - ((value / safeMaxPing) * graphHeight);
+                return x + "," + y;
+            }).join(" ");
 
-                return React.createElement("circle", {
-                    key: index,
-                    cx: x,
-                    cy: y,
-                    r: 4,
-                    className: "fill-primary opacity-0 hover:opacity-100 cursor-pointer"
+            return React.createElement("div", {
+                className: "mt-2 w-full max-w-md"
+            },
+                React.createElement("div", {
+                    className: "flex items-center justify-between mb-1"
                 },
-                    React.createElement("title", null, ping + "ms")
-                );
-            })
-        )
-    );
-}
+                    React.createElement("span", {
+                        className: "text-[10px] text-muted-foreground uppercase tracking-wide"
+                    }, "Latency"),
+
+                    React.createElement("span", {
+                        className: "text-[10px] text-muted-foreground"
+                    }, averagePing !== null
+                        ? "Avg " + averagePing + "ms · Latest " + latestPing + "ms"
+                        : "No data"
+                    )
+                ),
+
+                React.createElement("svg", {
+                    viewBox: "0 0 " + graphWidth + " " + graphHeight,
+                    preserveAspectRatio: "none",
+                    className: "w-full h-10 border border-border rounded-md bg-background/40"
+                },
+                    React.createElement("polyline", {
+                        points: points,
+                        fill: "none",
+                        stroke: "currentColor",
+                        strokeWidth: "2",
+                        className: "text-primary"
+                    }),
+
+                    pingHistory.map(function (ping, index) {
+                        if (typeof ping !== "number" || ping < 0) return null;
+
+                        const x = pingHistory.length <= 1 ? 0 : (index / (pingHistory.length - 1)) * graphWidth;
+                        const y = graphHeight - ((ping / safeMaxPing) * graphHeight);
+
+                        return React.createElement("circle", {
+                            key: index,
+                            cx: x,
+                            cy: y,
+                            r: 5,
+                            className: "fill-primary opacity-0 hover:opacity-100 cursor-pointer"
+                        },
+                            React.createElement("title", null, ping + "ms")
+                        );
+                    })
+                )
+            );
+        }
 
         const monitorsSafe = monitors || {};
 
@@ -413,9 +402,10 @@ function renderLatencyGraph(pingHistory) {
                                                             className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
                                                         }, "🗑 Delete")
                                                     )
-                                                )
-                                            ),
-                                            renderLatencyGraph(pingHistory)
+                                                ),
+
+                                                renderLatencyGraph(pingHistory)
+                                            );
                                         })
                                     )
                                 );
