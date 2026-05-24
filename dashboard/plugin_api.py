@@ -52,7 +52,7 @@ async def add(url: str = Query(...)):
 
 
 @router.post("/test")
-async def add(request: Request) -> Dict[str, Any]:
+async def addshit(request: Request) -> Dict[str, Any]:
     body = await request.json()
     print("Received test request with body: ", body.get("value"))
     return {"success": True, "message": body.get("value")}
