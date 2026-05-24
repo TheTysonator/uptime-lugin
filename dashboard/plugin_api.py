@@ -4,7 +4,7 @@ Mounted at /api/plugins/website-monitor/ by the plugin system.
 
 import json
 from pathlib import Path
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 # 🟢 CORRECT CANONICAL IMPORT FOR DASHBOARD ROUTING
 from hermes_cli.config import get_hermes_home
 
@@ -51,7 +51,7 @@ async def add(url: str = Query(...)):
 
 
 @router.post("/test")
-async def add(request):
+async def add(request: Request):
     body = await request.json()
     print("Received test request with body: ", body)
     return {"success": True, "message": body.value}
