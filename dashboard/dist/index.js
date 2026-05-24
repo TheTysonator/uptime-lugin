@@ -20,7 +20,7 @@
             event.preventDefault();
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/uptime/add", {
+            SDK.fetchJSON("/api/plugins/monitoring/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -50,7 +50,7 @@
         function getMonitors() {
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/uptime/get").then(data => {
+            SDK.fetchJSON("/api/plugins/monitoring/get").then(data => {
                 if (data && data.success) {
                     setMonitors(data.monitors || {});
                 } else {
@@ -69,7 +69,7 @@
 
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/uptime/remove", {
+            SDK.fetchJSON("/api/plugins/monitoring/remove", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: monitorId })
@@ -458,4 +458,5 @@
 })();
 
 
-// chart hover and levels and averages, overall, View up and down overall
+
+// change from uptime to monitoring
