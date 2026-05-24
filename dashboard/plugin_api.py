@@ -37,10 +37,14 @@ async def status():
     return {"success": True, "monitors": _load_monitors()}
 
 
-@router.get("/add")
-async def add(url: str = Query(...)):
-    """Add a new URL to monitoring."""
-    url = url.strip()
+
+
+
+@router.post("/add")
+async def addshit(request: Request) -> Dict[str, Any]:
+    body = await request.json()
+    url = body.get("url", "").strip()
+
     if not url.startswith(("http://", "https://")):
         return {"success": False, "error": "URL must begin with http:// or https://"}
     monitors = _load_monitors()
@@ -49,13 +53,6 @@ async def add(url: str = Query(...)):
     monitors[url] = {"last_status": "UNKNOWN"}
     _save_monitors(monitors)
     return {"success": True, "message": f"Added {url}."}
-
-
-@router.post("/test")
-async def addshit(request: Request) -> Dict[str, Any]:
-    body = await request.json()
-    print("Received test request with body: ", body.get("value"))
-    return {"success": True, "message": body.get("value")}
 
 
 @router.get("/remove")
