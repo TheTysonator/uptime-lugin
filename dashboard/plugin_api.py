@@ -49,7 +49,7 @@ def _normalise_ping_history(monitor_data: dict) -> None:
     monitor_data["ping_history"] = ping_history
 
 
-@router.get("/status")
+@router.get("/get")
 async def status():
     """Returns monitors with normalized 30-point ping history."""
 
@@ -135,17 +135,30 @@ async def addshit(request: Request) -> Dict[str, Any]:
     }
 
 
-@router.get("/remove")
-async def remove(url: str = Query(...)):
+@router.post("/remove")
+async def remove(request: Request):
     """Remove a URL or monitor ID from monitoring."""
 
-    monitor_id = url.strip()
+    body = await request.json()
+
+    monitor_id = body.get("url", "").strip()
+
+    if not monitor_id:
+        return {
+            "success": False,
+            "error": "Monitor ID is required."
+        }
+
     monitors = _load_monitors()
 
     if monitor_id not in monitors:
-        return {"success": False, "error": "Not monitored."}
+        return {
+            "success": False,
+            "error": "Not monitored."
+        }
 
     del monitors[monitor_id]
+
     _save_monitors(monitors)
 
     return {

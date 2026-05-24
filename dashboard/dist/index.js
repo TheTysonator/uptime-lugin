@@ -1,3 +1,5 @@
+
+
 (function () {
 
     "use strict";
@@ -6,9 +8,7 @@
     // Software Development Kit
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;
-
     const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
-
     const { useState, useEffect } = SDK.hooks;
 
 
@@ -25,7 +25,7 @@
         const [newMonitorConfiguration, setNewMonitorConfiguration] = useState("");
 
         // Add Monitor
-        function addMonitor(event) {
+        function addMonitor ( event ) {
             // Prevent Default
             event.preventDefault();
             // Loading
@@ -64,33 +64,62 @@
         function getMonitors () {
             // Loading
             setLoading(true);
+            // API Request
+            SDK.fetchJSON("/api/plugins/uptime/get").then( data => {
+                if ( data && data.success ) {
+                    setMonitors(data.monitors || {});
+                } else {
+                    setMessage("Failed to load: backend returned unsuccessful response.");
+                }
+            }).catch( err => {
+                setMessage("Failed to load monitors: " + err ? (err.message || String(err)) : "Unknown Exception");
+                console.error("Website Monitor load error:", err);
+            }).finally( () => {
+                setLoading(false);
+            });
+        };
+
+        // Remove Monitor
+        function removeMonitor ( monitorId ) {
+            // Confirmation
+            if (!confirm("Are you sure you want to stop monitoring " + monitorId + "?")) return;
+            // Loading
+            setLoading(true);
+            // API Request
 
 
 
-            SDK.fetchJSON("/api/plugins/uptime/status")
 
-            
-                .then(function (data) {
-                    if (data && data.success) {
-                        setMonitors(data.monitors || {});
-                    } else {
-                        setMessage("Failed to load: backend returned unsuccessful response.");
-                    }
-                })
-                .catch(function (err) {
-                    const errMsg = err ? (err.message || String(err)) : "Unknown Exception";
-                    setMessage("Failed to load monitors: " + errMsg);
-                    console.error("Website Monitor load error:", err);
-                })
-                .finally(function () {
-                    setLoading(false);
-                });
+SDK.fetchJSON("/api/plugins/uptime/remove", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        url: monitorId
+    })
+})
+    .then(function (data) {
+        if (data && data.success) {
+            setMessage("Removed " + monitorId);
+            getMonitors();
+        } else {
+            setMessage("Error: " + (data ? data.error : "Unknown Error"));
+        }
+    })
+    .catch(function (err) {
+        setMessage("API request failed: " + (err ? err.message : String(err)));
+    })
+    .finally(function () {
+        setLoading(false);
+    });
+
+    
         }
 
 
 
-
-// delete, view history/ping, overall
+// delete, chart hover and levels, overall, View up and down overall
 
 
 
@@ -104,27 +133,7 @@
 
 
 
-        function handleRemove(monitorId) {
-            if (!confirm("Are you sure you want to stop monitoring " + monitorId + "?")) return;
 
-            setLoading(true);
-
-            SDK.fetchJSON("/api/plugins/uptime/remove?url=" + encodeURIComponent(monitorId))
-                .then(function (data) {
-                    if (data && data.success) {
-                        setMessage("Removed " + monitorId);
-                        getMonitors();
-                    } else {
-                        setMessage("Error: " + (data ? data.error : "Unknown Error"));
-                    }
-                })
-                .catch(function (err) {
-                    setMessage("API request failed: " + (err ? err.message : String(err)));
-                })
-                .finally(function () {
-                    setLoading(false);
-                });
-        }
 
         function getMonitorName(monitorId, monitorInfo) {
             if (monitorInfo && monitorInfo.name) return monitorInfo.name;
@@ -381,7 +390,7 @@
 
                                                         React.createElement(Button, {
                                                             onClick: function () {
-                                                                handleRemove(monitorId);
+                                                                removeMonitor(monitorId);
                                                             },
                                                             disabled: loading,
                                                             className: "text-xs border border-destructive/30 hover:bg-destructive/10 text-destructive px-3 py-1 cursor-pointer"
