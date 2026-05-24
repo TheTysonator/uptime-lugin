@@ -2,13 +2,20 @@
 
     "use strict";
 
+
+    // Software Development Kit
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;
+
     const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
+
     const { useState, useEffect } = SDK.hooks;
 
+
+    // Plugin Page
     function PluginPage() {
 
+        // Variables
         const [loading, setLoading] = useState(false);
         const [message, setMessage] = useState(null);
         const [monitors, setMonitors] = useState({});
@@ -17,6 +24,7 @@
         const [newMonitorType, setNewMonitorType] = useState("website");
         const [newMonitorConfiguration, setNewMonitorConfiguration] = useState("");
 
+        // Add Monitor
         function addMonitor(event) {
             event.preventDefault();
             setLoading(true);
@@ -32,26 +40,24 @@
                     app: newMonitorApplication,
                     configuration: newMonitorConfiguration
                 })
-            })
-                .then(function (data) {
-                    if (data && data.success) {
-                        setMessage("Successfully added " + newMonitorName);
-                        setNewMonitorName("");
-                        setNewMonitorApplication("");
-                        setNewMonitorType("website");
-                        setNewMonitorConfiguration("");
-                        getMonitors();
-                    } else {
-                        setMessage("Error: " + (data ? data.error : "Unknown Error"));
-                    }
-                })
-                .catch(function (err) {
-                    setMessage("API request failed: " + (err ? err.message : String(err)));
-                })
-                .finally(function () {
-                    setLoading(false);
-                });
+            }).then(data => {
+                if (data && data.success) {
+                    setMessage("Successfully added " + newMonitorName);
+                    setNewMonitorName("");
+                    setNewMonitorApplication("");
+                    setNewMonitorType("website");
+                    setNewMonitorConfiguration("");
+                    getMonitors();
+                } else {
+                    setMessage("Error: " + (data ? data.error : "Unknown Error"));
+                }
+            }).catch(err => {
+                setMessage("API request failed: " + (err ? err.message : String(err)));
+            }).finally(() => {
+                setLoading(false);
+            });
         }
+
 
         function getMonitors() {
             setLoading(true);
@@ -74,15 +80,15 @@
                 });
         }
 
+
         useEffect(function () {
             getMonitors();
-
             const interval = setInterval(getMonitors, 15000);
-
             return function () {
                 clearInterval(interval);
             };
         }, []);
+
 
         function removeMonitor(monitorId) {
             setLoading(true);
@@ -112,6 +118,7 @@
                 });
         }
 
+
         function getMonitorName(monitorId, monitorInfo) {
             if (monitorInfo && monitorInfo.name) return monitorInfo.name;
             if (monitorInfo && monitorInfo.url) return monitorInfo.url;
@@ -129,7 +136,7 @@
 
         function renderLatencyGraph(pingHistory) {
             const graphWidth = 300;
-            const graphHeight = 42;
+            const graphHeight = 36;
 
             const validPings = pingHistory.filter(function (value) {
                 return typeof value === "number" && value >= 0;
@@ -154,7 +161,7 @@
             }).join(" ");
 
             return React.createElement("div", {
-                className: "mt-2 w-full max-w-md"
+                className: "mt-2 w-full max-w-sm"
             },
                 React.createElement("div", {
                     className: "flex items-center justify-between mb-1"
@@ -174,7 +181,7 @@
                 React.createElement("svg", {
                     viewBox: "0 0 " + graphWidth + " " + graphHeight,
                     preserveAspectRatio: "none",
-                    className: "w-full h-10 border border-border rounded-md bg-background/40"
+                    className: "w-full h-9 border border-border rounded-md bg-background/40"
                 },
                     React.createElement("polyline", {
                         points: points,
@@ -194,7 +201,7 @@
                             key: index,
                             cx: x,
                             cy: y,
-                            r: 5,
+                            r: 4,
                             className: "fill-primary opacity-0 hover:opacity-100 cursor-pointer"
                         },
                             React.createElement("title", null, ping + "ms")
