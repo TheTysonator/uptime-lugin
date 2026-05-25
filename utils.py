@@ -39,7 +39,6 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
     monitors[f"{ application }:{ name }"] = {
         "type": monitor_type,
         "configuration": configuration,
-        "last_status": "Unknown",
         "ping_history": [-1] * 30
     }
     return monitors, ""

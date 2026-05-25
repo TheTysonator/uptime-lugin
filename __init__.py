@@ -12,7 +12,7 @@ import threading
 import time
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, Tuple
+
 
 from hermes_constants import get_hermes_home
 
@@ -33,7 +33,7 @@ def _get_lock_path() -> Path:
     return get_hermes_home() / "plugins" / "monitoring" / "monitor.lock"
 
 
-def _load_monitors() -> Dict[str, Dict[str, Any]]:
+def _load_monitors():
     path = _get_config_path()
 
     if not path.exists():
@@ -46,7 +46,7 @@ def _load_monitors() -> Dict[str, Dict[str, Any]]:
         return {}
 
 
-def _save_monitors(monitors: Dict[str, Dict[str, Any]]) -> None:
+def _save_monitors(monitors) -> None:
     path = _get_config_path()
 
     try:
@@ -55,7 +55,7 @@ def _save_monitors(monitors: Dict[str, Dict[str, Any]]) -> None:
         logger.error(f"Failed to write website monitors config: {e}")
 
 
-def _record_ping(info: Dict[str, Any], latency_ms: int) -> None:
+def _record_ping(info, latency_ms: int) -> None:
     history = info.get("ping_history", [])
 
     if not isinstance(history, list):
@@ -65,7 +65,7 @@ def _record_ping(info: Dict[str, Any], latency_ms: int) -> None:
     info["ping_history"] = history[-30:]
 
 
-def _check_website(url: str) -> Tuple[bool, int]:
+def _check_website(url):
     start_time = time.time()
 
     try:
@@ -82,7 +82,7 @@ def _check_website(url: str) -> Tuple[bool, int]:
         return False, -1
 
 
-def _build_proxy_runtime_config(config: Dict[str, Any], socks_port: int) -> Dict[str, Any]:
+def _build_proxy_runtime_config(config, socks_port):
     outbounds = config.get("outbounds", [])
 
     if not outbounds:
@@ -108,7 +108,7 @@ def _build_proxy_runtime_config(config: Dict[str, Any], socks_port: int) -> Dict
     }
 
 
-def _check_proxy(name: str, config: Dict[str, Any]) -> Tuple[bool, int]:
+def _check_proxy(name, config):
     test_url = config.get("test_url", "https://api.ipify.org")
     socks_port = int(config.get("socks_port", 12334))
 
@@ -208,7 +208,7 @@ def _check_proxy(name: str, config: Dict[str, Any]) -> Tuple[bool, int]:
                 pass
 
 
-def _send_alert(ctx, target_room: str, message: str) -> None:
+def _send_alert(ctx, target_room, message) -> None:
     try:
         result = ctx.dispatch_tool(
             "send_message",
