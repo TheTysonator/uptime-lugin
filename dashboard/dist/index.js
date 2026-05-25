@@ -301,13 +301,7 @@ function renderOverviewStat(label, value, colourClass) {
                 React.createElement(CardContent, {
                     className: "flex flex-col gap-6"
                 },
-                    React.createElement("div", {
-                        className: overviewStats.down > 0
-                            ? "rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-500/15 via-background to-background p-8"
-                            : overviewStats.unknown > 0
-                                ? "rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 via-background to-background p-8"
-                                : "rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-background to-background p-8"
-                    },
+
                         React.createElement("div", {
                             className: "flex flex-col gap-8"
                         },
@@ -345,7 +339,7 @@ function renderOverviewStat(label, value, colourClass) {
                                                 ? "No confirmed outages detected, but some services have not yet reported a healthy state."
                                                 : "Every monitored service is currently healthy and responding normally."
                                 )
-                            ),
+                            ,
 
                             React.createElement("div", {
                                 className: "flex flex-row flex-wrap items-stretch gap-4 w-full"
