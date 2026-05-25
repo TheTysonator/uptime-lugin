@@ -369,7 +369,7 @@ function renderOverviewStat(label, value, colourClass) {
                     )
                 ),
 
-
+                React.createElement(CardContent, { className: "flex flex-col gap-4" },
 
                     React.createElement("form", { onSubmit: addMonitor, className: "flex flex-col gap-3 mt-2" },
                         React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3" },
@@ -423,7 +423,7 @@ function renderOverviewStat(label, value, colourClass) {
                     message && React.createElement("div", {
                         className: "text-xs font-mono text-amber-500 mt-1"
                     }, message)
-                
+                )
             ),
 
             React.createElement(Card, null,
