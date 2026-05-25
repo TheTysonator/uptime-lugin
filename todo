@@ -1,6 +1,7 @@
 Next: tools.py
 While: update utils.py functions with validation
 And: complete plugin.yaml and 3 tools only
+Then: README
 
 __init__.py
 plugin.yaml
