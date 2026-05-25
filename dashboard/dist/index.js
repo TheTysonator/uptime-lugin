@@ -360,7 +360,7 @@ function renderOverviewStat(label, value, colourClass) {
                                 renderOverviewStat(
                                     "Online",
                                     overviewStats.up,
-                                    "text-emerald-400",
+                                    "text-cyan-400",
                                     "border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5"
                                 ),
 
