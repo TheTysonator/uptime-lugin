@@ -42,7 +42,9 @@ async def addshit(request: Request):
 
     monitors = _read_monitors()
 
+    print(monitors)
     monitors = _add_monitor(monitors, app, name, monitor_type, configuration)
+    print(monitors)
 
     _write_monitors(monitors)
 
