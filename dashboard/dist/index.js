@@ -214,7 +214,7 @@
 
         const appNames = Object.keys(groupedMonitors).sort();
 
-function renderOverviewStat(label, value, colourClass) {
+function renderOverviewStat(label, value) {
 
     let backgroundColor = "rgba(120, 120, 120, 0.12)";
     let borderColor = "rgba(255, 255, 255, 0.12)";
@@ -335,26 +335,22 @@ function renderOverviewStat(label, value, colourClass) {
                             },
                                 renderOverviewStat(
                                     "Total",
-                                    overviewStats.total,
-                                    "text-cyan-400",
+                                    overviewStats.total
                                 ),
 
                                 renderOverviewStat(
                                     "Online",
-                                    overviewStats.up,
-                                    "text-cyan-400",
+                                    overviewStats.up
                                 ),
 
                                 renderOverviewStat(
                                     "Down",
-                                    overviewStats.down,
-                                    "text-rose-400",
+                                    overviewStats.down
                                 ),
 
                                 renderOverviewStat(
                                     "Unknown",
-                                    overviewStats.unknown,
-                                    "text-amber-300",
+                                    overviewStats.unknown
                                 )
                             )
                         )
