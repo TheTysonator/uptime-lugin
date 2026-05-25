@@ -14,12 +14,11 @@ router = APIRouter()
 
 
 # website_monitors.json location and lock location, overview section looks / font / look at bulit in components /remove extra sentence / boxes / border, this file, index, then dashboard done
-# index demo
 
 
 
 def _get_config_path():
-    return get_hermes_home() / "website_monitors.json"
+    return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
 
 def _load_monitors() -> dict:

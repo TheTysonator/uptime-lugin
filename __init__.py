@@ -25,12 +25,12 @@ if not hasattr(builtins, "_hermes_uptime_thread_lock"):
     builtins._hermes_uptime_thread_lock = threading.Lock()
 
 
-def _get_config_path() -> Path:
-    return get_hermes_home() / "website_monitors.json"
+def _get_config_path():
+    return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
 
 def _get_lock_path() -> Path:
-    return get_hermes_home() / "uptime_monitor.lock"
+    return get_hermes_home() / "plugins" / "monitoring" / "monitor.lock"
 
 
 def _load_monitors() -> Dict[str, Dict[str, Any]]:
