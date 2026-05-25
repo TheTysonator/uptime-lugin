@@ -33,14 +33,18 @@ def _write_monitors ( monitors ):
 
 
 
+import logging
 import sys
 from pathlib import Path
 
-print("CURRENT FILE:", Path(__file__).resolve())
-print("CURRENT WORKING DIR:", Path.cwd())
-print("PYTHON PATH:")
-for path in sys.path:
-    print(" -", path)
+logger = logging.getLogger("HERMES_PLUGINS.MONITORING")
+
+CURRENT_FILE = Path(__file__).resolve()
+PROJECT_DIR = CURRENT_FILE.parent.parent
+
+logger.warning("CURRENT FILE: %s", CURRENT_FILE)
+logger.warning("PROJECT DIR: %s", PROJECT_DIR)
+logger.warning("PYTHON PATH: %s", sys.path)
 
 
 
