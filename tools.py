@@ -4,8 +4,22 @@ from __future__ import annotations
 
 import json
 import re
-from . import _load_monitors, _save_monitors, _check_website
 
+
+
+import importlib.util
+import pathlib
+
+
+# Import Utils
+spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent / "utils.py")
+utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(utils)
+
+# Imported Functions
+_write_monitors = utils._write_monitors
+_read_monitors = utils._read_monitors
+_get_lock_path = utils._get_lock_path
 
 # --- SCHEMAS ---
 
@@ -115,7 +129,7 @@ def _handle_add_website_monitor ( args: dict, **kw ) -> str :
             "error": "Monitor application must be an alphanumeric string that can include spaces."
         })
     # Load Monitors
-    monitors = _load_monitors()
+    monitors = _read_monitors()
     # Check For Duplicates
     if f"{ application}:{ name }" in monitors:
         return json.dumps({
@@ -128,7 +142,7 @@ def _handle_add_website_monitor ( args: dict, **kw ) -> str :
         "configuration": configuration,
         "last_status": "Unknown"
     }
-    _save_monitors(monitors)
+    _write_monitors(monitors)
     return json.dumps({
         "success": True,
         "message": f"Successfully added the monitor for { configuration }."}
@@ -153,7 +167,7 @@ def _handle_add_proxy_monitor ( args: dict, **kw ) -> str :
             "error": "Monitor application must be an alphanumeric string that can include spaces."
         })
     # Load Monitors
-    monitors = _load_monitors()
+    monitors = _read_monitors()
     # Check For Duplicates
     if f"{ application }:{ name }" in monitors:
         return json.dumps({
@@ -166,7 +180,7 @@ def _handle_add_proxy_monitor ( args: dict, **kw ) -> str :
         "configuration": configuration,
         "last_status": "Unknown"
     }
-    _save_monitors(monitors)
+    _write_monitors(monitors)
     return json.dumps({
         "success": True,
         "message": f"Successfully added the proxy monitor for the { name }."
@@ -176,7 +190,7 @@ def _handle_add_proxy_monitor ( args: dict, **kw ) -> str :
 # Handle List Monitors
 def _handle_list_monitors ( args: dict, **kw ) -> str :
     # Load Monitors
-    monitors = _load_monitors()
+    monitors = _read_monitors()
     # Return Monitors
     return json.dumps({
         "success": True,
@@ -201,7 +215,7 @@ def _handle_remove_monitor ( args: dict, **kw ) -> str :
             "error": "Monitor application must be an alphanumeric string that can include spaces."
         })
     # Load Monitors
-    monitors = _load_monitors()
+    monitors = _read_monitors()
     # Find Monitor
     if f"{ application }:{ name }" not in monitors:
         return json.dumps({
@@ -210,7 +224,7 @@ def _handle_remove_monitor ( args: dict, **kw ) -> str :
         })
     # Remove Monitor
     del monitors[f"{ application }:{ name }"]
-    _save_monitors(monitors)
+    _write_monitors(monitors)
     return json.dumps({
         "success": True,
         "message": f"Successfully removed { name } from being monitored."
