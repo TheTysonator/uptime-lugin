@@ -26,7 +26,7 @@
                 body: JSON.stringify({
                     type: newMonitorType,
                     name: newMonitorName,
-                    app: newMonitorApplication,
+                    application: newMonitorApplication,
                     configuration: newMonitorConfiguration
                 })
             }).then(data => {

@@ -31,7 +31,7 @@ def _write_monitors ( monitors ):
 
 
 
-def _add_monitor ( monitors, application, name, type, configuration ):
+def _add_monitor ( monitors, application, name, monitor_type, configuration ):
     # Check if Monitor Already Exists
     if f"{ application }:{ name }" in monitors:
         return json.dumps({
@@ -40,7 +40,7 @@ def _add_monitor ( monitors, application, name, type, configuration ):
         })
     # Add Monitor
     monitors[f"{ application }:{ name }"] = {
-        "type": type,
+        "type": monitor_type,
         "configuration": configuration,
         "last_status": "Unknown",
         "ping_history": [-1] * 30

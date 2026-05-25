@@ -1,3 +1,8 @@
+
+
+
+
+
 # Standard Imports
 import json
 
@@ -25,9 +30,7 @@ utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(utils)
 
 _read_monitors = utils._read_monitors
-
 _write_monitors = utils._write_monitors
-
 _add_monitor = utils._add_monitor
 
 
@@ -42,9 +45,7 @@ async def addshit(request: Request):
 
     monitors = _read_monitors()
 
-    print(monitors)
     monitors = _add_monitor(monitors, app, name, monitor_type, configuration)
-    print(monitors)
 
     _write_monitors(monitors)
 
@@ -63,34 +64,12 @@ async def addshit(request: Request):
 
 
 
-
-
-
-def _normalise_ping_history(monitor_data: dict) -> None:
-    ping_history = monitor_data.get("ping_history", [])
-
-    if not isinstance(ping_history, list):
-        ping_history = []
-
-    ping_history = ping_history[-30:]
-
-    while len(ping_history) < 30:
-        ping_history.insert(0, -1)
-
-    monitor_data["ping_history"] = ping_history
-
-
 @router.get("/get")
 async def status():
     """Returns monitors with normalized 30-point ping history."""
 
     monitors = _read_monitors()
 
-    for monitor_id, monitor_data in monitors.items():
-        if not isinstance(monitor_data, dict):
-            continue
-
-        _normalise_ping_history(monitor_data)
 
     return {
         "success": True,
