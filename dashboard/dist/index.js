@@ -216,26 +216,26 @@
 
 function renderOverviewStat(label, value, colourClass) {
 
-    let backgroundClass = "bg-background/40";
-    let borderClass = "border-border";
+    let backgroundClass = "bg-zinc-500/10";
+    let borderClass = "border-zinc-500/20";
 
     if (label === "Total") {
-        backgroundClass = "bg-cyan-500/10";
-        borderClass = "border-cyan-500/20";
+        backgroundClass = "bg-cyan-500/15";
+        borderClass = "border-cyan-500/30";
     } else if (label === "Online") {
-        backgroundClass = "bg-emerald-500/10";
-        borderClass = "border-emerald-500/20";
+        backgroundClass = "bg-emerald-500/15";
+        borderClass = "border-emerald-500/30";
     } else if (label === "Down") {
-        backgroundClass = "bg-rose-500/10";
-        borderClass = "border-rose-500/20";
+        backgroundClass = "bg-rose-500/15";
+        borderClass = "border-rose-500/30";
     } else if (label === "Unknown") {
-        backgroundClass = "bg-amber-500/10";
-        borderClass = "border-amber-500/20";
+        backgroundClass = "bg-amber-500/15";
+        borderClass = "border-amber-500/30";
     }
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border border-border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
             backgroundClass + " " + borderClass
     },
 
