@@ -161,7 +161,7 @@ def _handle_add_proxy_monitor ( args: dict, **kw ) -> str :
             "message": f"{ name } is already being monitored under { application }."
         })
     # Add Monitor
-    monitors[f"{ application }: { name }"] = {
+    monitors[f"{ application }:{ name }"] = {
         "type": "proxy",
         "configuration": configuration,
         "last_status": "Unknown"

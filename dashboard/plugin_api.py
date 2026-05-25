@@ -4,41 +4,54 @@ import json
 # External Imports
 from fastapi import APIRouter
 
-# Hermes Imports
-from hermes_cli.config import get_hermes_home
 
+from .utils import _read_monitors, _write_monitors, _add_monitor
 
 # Router
 router = APIRouter()
 
 
 
-# website_monitors.json location and lock location, overview section looks / font / look at bulit in components /remove extra sentence / boxes / border, this file, index, then dashboard done
 
 
 
-def _get_config_path():
-    return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
 
-def _load_monitors() -> dict:
-    path = _get_config_path()
-    if not path.exists():
-        return {}
-
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
 
 
-def _save_monitors(monitors: dict) -> None:
-    path = _get_config_path()
 
-    try:
-        path.write_text(json.dumps(monitors, indent=2), encoding="utf-8")
-    except Exception:
-        pass
+@router.post("/add")
+async def addshit(request):
+    body = await request.json()
+
+    monitor_type = body.get("type", "website")
+    name = body.get("name", "").strip()
+    app = body.get("application", "").strip()
+    configuration = body.get("configuration", "").strip()
+
+
+    monitors = _read_monitors()
+
+    _add_monitor(monitors, app, name, monitor_type, configuration)
+
+    _write_monitors(monitors)
+
+    return {
+        "success": True,
+        "message": f"Added {name}."
+    }
+
+
+
+# overview section looks, this file, index, then dashboard done
+
+
+
+
+
+
+
+
 
 
 def _normalise_ping_history(monitor_data: dict) -> None:
@@ -59,7 +72,7 @@ def _normalise_ping_history(monitor_data: dict) -> None:
 async def status():
     """Returns monitors with normalized 30-point ping history."""
 
-    monitors = _load_monitors()
+    monitors = _read_monitors()
 
     for monitor_id, monitor_data in monitors.items():
         if not isinstance(monitor_data, dict):
@@ -73,72 +86,7 @@ async def status():
     }
 
 
-@router.post("/add")
-async def addshit(request):
-    body = await request.json()
 
-    monitor_type = body.get("type", "website")
-    name = body.get("name", "").strip()
-    app = body.get("app", "").strip()
-    configuration = body.get("configuration", "").strip()
-
-    if not name:
-        return {"success": False, "error": "Monitor name is required"}
-
-    if not app:
-        return {"success": False, "error": "Application name is required"}
-
-    if monitor_type not in ("website", "proxy"):
-        return {"success": False, "error": "Monitor type must be website or proxy"}
-
-    monitors = _load_monitors()
-
-    if monitor_type == "website":
-        url = configuration
-
-        if not url.startswith(("http://", "https://")):
-            return {"success": False, "error": "URL must begin with http:// or https://"}
-
-        monitor_id = url
-
-        if monitor_id in monitors:
-            return {"success": True, "message": "Already monitored."}
-
-        monitors[monitor_id] = {
-            "type": "website",
-            "name": name,
-            "app": app,
-            "url": url,
-            "last_status": "UNKNOWN",
-            "ping_history": [-1] * 30
-        }
-
-    elif monitor_type == "proxy":
-        try:
-            proxy_config = json.loads(configuration)
-        except Exception:
-            return {"success": False, "error": "Proxy configuration must be valid JSON"}
-
-        monitor_id = "proxy:" + name
-
-        if monitor_id in monitors:
-            return {"success": True, "message": "Already monitored."}
-
-        monitors[monitor_id] = {
-            "type": "proxy",
-            "name": name,
-            "app": app,
-            "config": proxy_config,
-            "last_status": "UNKNOWN",
-            "ping_history": [-1] * 30
-        }
-
-    _save_monitors(monitors)
-
-    return {
-        "success": True,
-        "message": f"Added {name}."
-    }
 
 
 @router.post("/remove")
@@ -155,7 +103,7 @@ async def remove(request):
             "error": "Monitor ID is required."
         }
 
-    monitors = _load_monitors()
+    monitors = _read_monitors()
 
     if monitor_id not in monitors:
         return {
@@ -165,7 +113,7 @@ async def remove(request):
 
     del monitors[monitor_id]
 
-    _save_monitors(monitors)
+    _write_monitors(monitors)
 
     return {
         "success": True,
