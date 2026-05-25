@@ -1,6 +1,9 @@
-"""Website Monitor Plugin for Hermes Agent."""
+# Standard Imports
 
-from __future__ import annotations
+
+
+
+
 
 import builtins
 import fcntl
@@ -11,10 +14,24 @@ import tempfile
 import threading
 import time
 import urllib.request
-from pathlib import Path
 
 
-from hermes_constants import get_hermes_home
+import importlib.util
+import pathlib
+
+
+# Import Utils
+spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent.parent / "utils.py")
+utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(utils)
+
+# Imported Functions
+_write_monitors = utils._write_monitors
+_read_monitors = utils._read_monitors
+_get_lock_path = utils._get_lock_path
+
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,34 +42,8 @@ if not hasattr(builtins, "_hermes_uptime_thread_lock"):
     builtins._hermes_uptime_thread_lock = threading.Lock()
 
 
-def _get_config_path():
-    return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
 
-def _get_lock_path() -> Path:
-    return get_hermes_home() / "plugins" / "monitoring" / "monitor.lock"
-
-
-def _load_monitors():
-    path = _get_config_path()
-
-    if not path.exists():
-        return {}
-
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        logger.error(f"Failed to read website monitors config: {e}")
-        return {}
-
-
-def _save_monitors(monitors) -> None:
-    path = _get_config_path()
-
-    try:
-        path.write_text(json.dumps(monitors, indent=2), encoding="utf-8")
-    except Exception as e:
-        logger.error(f"Failed to write website monitors config: {e}")
 
 
 def _record_ping(info, latency_ms: int) -> None:
@@ -203,7 +194,7 @@ def _check_proxy(name, config):
 
         if temp_path:
             try:
-                Path(temp_path).unlink(missing_ok=True)
+                pathlib.Path(temp_path).unlink(missing_ok=True)
             except Exception:
                 pass
 
@@ -243,7 +234,7 @@ def _background_monitor_loop(ctx) -> None:
 
     while True:
         try:
-            monitors = _load_monitors()
+            monitors = _read_monitors()
             changed = False
 
             for monitor_id, info in list(monitors.items()):
@@ -267,12 +258,16 @@ def _background_monitor_loop(ctx) -> None:
                     alert_title = "PROXY MONITOR ALERT"
 
                 elif monitor_type == "website":
-                    if not monitor_id.startswith(("http://", "https://")):
-                        logger.warning(f"Skipping invalid website monitor key: {monitor_id}")
+                    configuration = info.get("configuration")
+
+                    if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
+                        logger.warning(
+                            f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
+                        )
                         continue
 
-                    is_up, latency_ms = _check_website(monitor_id)
-                    display_name = monitor_id
+                    is_up, latency_ms = _check_website(configuration)
+                    display_name = info.get("name", monitor_id)
                     alert_title = "WEBSITE UPTIME MONITOR ALERT"
 
                 else:
@@ -305,7 +300,7 @@ def _background_monitor_loop(ctx) -> None:
                         _send_alert(ctx, target_room, alert_msg)
 
             if changed:
-                _save_monitors(monitors)
+                _write_monitors(monitors)
 
         except Exception:
             logger.exception("Error in Website Monitor loop")

@@ -15,6 +15,9 @@ from hermes_cli.config import get_hermes_home
 def _get_monitors_path () :
     return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
+def _get_lock_path() :
+    return get_hermes_home() / "plugins" / "monitoring" / "monitor.lock"
+
 # Read Monitors
 def _read_monitors ():
     # Get Path
