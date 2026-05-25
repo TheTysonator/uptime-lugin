@@ -216,33 +216,37 @@
 
 function renderOverviewStat(label, value, colourClass) {
 
-    let tintClass = "bg-muted/30";
+    let backgroundColor = "rgba(120, 120, 120, 0.12)";
+    let borderColor = "rgba(255, 255, 255, 0.12)";
 
     if (label === "Total") {
-        tintClass = "bg-cyan-500/15";
+        backgroundColor = "rgba(6, 182, 212, 0.16)";
+        borderColor = "rgba(6, 182, 212, 0.28)";
     } else if (label === "Online") {
-        tintClass = "bg-emerald-500/15";
+        backgroundColor = "rgba(16, 185, 129, 0.16)";
+        borderColor = "rgba(16, 185, 129, 0.28)";
     } else if (label === "Down") {
-        tintClass = "bg-rose-500/15";
+        backgroundColor = "rgba(244, 63, 94, 0.16)";
+        borderColor = "rgba(244, 63, 94, 0.28)";
     } else if (label === "Unknown") {
-        tintClass = "bg-amber-500/15";
+        backgroundColor = "rgba(245, 158, 11, 0.16)";
+        borderColor = "rgba(245, 158, 11, 0.28)";
     }
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border border-border bg-background/40 px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm"
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm",
+        style: {
+            backgroundColor: backgroundColor,
+            borderColor: borderColor
+        }
     },
-
         React.createElement("div", {
-            className: "absolute inset-0 pointer-events-none " + tintClass
-        }),
-
-        React.createElement("div", {
-            className: "relative z-10 flex items-center justify-between gap-10"
+            className: "flex items-center justify-between gap-10"
         },
 
             React.createElement("div", {
-                className: "flex flex-col"
+                className: "flex flex-col z-10"
             },
 
                 React.createElement("span", {
@@ -263,7 +267,7 @@ function renderOverviewStat(label, value, colourClass) {
             ),
 
             React.createElement("div", {
-                className: "pr-4 flex items-center justify-center"
+                className: "pr-4 flex items-center justify-center z-10"
             },
 
                 React.createElement("span", {
