@@ -407,16 +407,16 @@ React.createElement(Card, null,
                 })
             ),
 
-            // Middle row
+            // Bottom row
             React.createElement("div", {
-                className: "grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3"
+                className: "flex flex-col md:flex-row items-stretch md:items-center gap-3"
             },
 
                 React.createElement(Select, {
                     value: newMonitorType,
                     onChange: e => setNewMonitorType(e.target.value),
                     disabled: loading,
-                    className: "h-9"
+                    className: "h-9 md:w-[180px] shrink-0"
                 },
                     React.createElement("option", {
                         value: "website"
@@ -429,6 +429,7 @@ React.createElement(Card, null,
 
                 React.createElement("input", {
                     type: "text",
+
                     placeholder:
                         newMonitorType === "proxy"
                             ? "Proxy URL / configuration"
@@ -444,13 +445,7 @@ React.createElement(Card, null,
                     className:
                         "flex-1 border border-border rounded-md px-3 py-2 text-sm " +
                         "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
-                })
-            ),
-
-            // Bottom row
-            React.createElement("div", {
-                className: "flex justify-end"
-            },
+                }),
 
                 React.createElement(Button, {
                     type: "submit",
@@ -462,8 +457,8 @@ React.createElement(Card, null,
                         !newMonitorConfiguration.trim(),
 
                     className:
-                        "bg-primary text-primary-foreground font-semibold " +
-                        "px-4 py-2 hover:bg-primary/90 text-sm cursor-pointer"
+                        "h-9 bg-primary text-primary-foreground font-semibold " +
+                        "px-4 hover:bg-primary/90 text-sm cursor-pointer whitespace-nowrap shrink-0"
                 }, "＋ Add Monitor")
             )
         ),
