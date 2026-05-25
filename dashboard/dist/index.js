@@ -235,7 +235,7 @@ function renderOverviewStat(label, value, colourClass) {
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border border-border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm" +
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
             backgroundClass + " " + borderClass
     },
 
@@ -303,7 +303,7 @@ function renderOverviewStat(label, value, colourClass) {
                 },
                     React.createElement("div", {
                         className: overviewStats.down > 0
-                            ? "rounded-3xl border border-border bg-gradient-to-br from-rose-500/15 via-background to-background p-8"
+                            ? "rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-500/15 via-background to-background p-8"
                             : overviewStats.unknown > 0
                                 ? "rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 via-background to-background p-8"
                                 : "rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-background to-background p-8"
@@ -354,7 +354,7 @@ function renderOverviewStat(label, value, colourClass) {
                                     "Total",
                                     overviewStats.total,
                                     "text-cyan-400",
-                                    "border border-border"
+                                    "border-cyan-500/30 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5"
                                 ),
 
                                 renderOverviewStat(
