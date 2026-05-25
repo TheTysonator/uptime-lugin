@@ -354,7 +354,7 @@ function renderOverviewStat(label, value, colourClass) {
                                     "Total",
                                     overviewStats.total,
                                     "text-cyan-400",
-                                    "border-cyan-500/30 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5"
+                                    "border border-border"
                                 ),
 
                                 renderOverviewStat(
