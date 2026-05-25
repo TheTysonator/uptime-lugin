@@ -288,9 +288,7 @@ function renderOverviewStat(label, value, colourClass) {
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
                     React.createElement("div", { className: "flex items-center justify-between" },
-                        React.createElement(CardTitle, {
-                            className: "text-xl font-bold"
-                        }, "Overview"),
+                        React.createElement(CardTitle, "Overview"),
 
                         React.createElement(Button, {
                             onClick: getMonitors,
@@ -365,7 +363,7 @@ function renderOverviewStat(label, value, colourClass) {
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
                     React.createElement("div", { className: "flex items-center justify-between" },
-                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "Add Monitor")
+                        React.createElement(CardTitle, "Add Monitor")
                     )
                 ),
 
