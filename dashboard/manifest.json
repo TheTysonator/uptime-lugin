@@ -9,6 +9,6 @@
         "position": "after:skills"
     },
     "slots": [],
-    "entry": "dist/index.js",
+    "entry": "dist/test.js",
     "api": "plugin_api.py"
 }
