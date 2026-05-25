@@ -358,120 +358,59 @@ function renderOverviewStat(label, value) {
                 )
             ),
 
-React.createElement(Card, null,
+// Middle + bottom row combined
+React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-[180px_1fr_auto] gap-3"
+},
 
-    React.createElement(CardHeader, null,
-        React.createElement("div", {
-            className: "flex items-center justify-between"
-        },
-            React.createElement("h2", {
-                className: "text-xl font-bold tracking-tight"
-            }, "Add Monitor")
-        )
+    React.createElement(Select, {
+        value: newMonitorType,
+        onChange: e => setNewMonitorType(e.target.value),
+        disabled: loading,
+        className: "h-9"
+    },
+        React.createElement("option", {
+            value: "website"
+        }, "Website"),
+
+        React.createElement("option", {
+            value: "proxy"
+        }, "Proxy")
     ),
 
-    React.createElement(CardContent, {
-        className: "flex flex-col gap-4"
-    },
+    React.createElement("input", {
+        type: "text",
 
-        React.createElement("form", {
-            onSubmit: addMonitor,
-            className: "flex flex-col gap-3 mt-2"
-        },
+        placeholder:
+            newMonitorType === "proxy"
+                ? "Proxy URL / configuration"
+                : "https://mywebsite.com",
 
-            // Top row
-            React.createElement("div", {
-                className: "grid grid-cols-1 md:grid-cols-2 gap-3"
-            },
+        value: newMonitorConfiguration,
 
-                React.createElement("input", {
-                    type: "text",
-                    placeholder: "Monitor name",
-                    value: newMonitorName,
-                    onChange: e => setNewMonitorName(e.target.value),
-                    disabled: loading,
-                    className:
-                        "border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
-                }),
+        onChange: e =>
+            setNewMonitorConfiguration(e.target.value),
 
-                React.createElement("input", {
-                    type: "text",
-                    placeholder: "Application name",
-                    value: newMonitorApplication,
-                    onChange: e => setNewMonitorApplication(e.target.value),
-                    disabled: loading,
-                    className:
-                        "border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
-                })
-            ),
+        disabled: loading,
 
-            // Middle row
-            React.createElement("div", {
-                className: "grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3"
-            },
+        className:
+            "flex-1 border border-border rounded-md px-3 py-2 text-sm " +
+            "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
+    }),
 
-                React.createElement(Select, {
-                    value: newMonitorType,
-                    onChange: e => setNewMonitorType(e.target.value),
-                    disabled: loading,
-                    className: "h-9"
-                },
-                    React.createElement("option", {
-                        value: "website"
-                    }, "Website"),
+    React.createElement(Button, {
+        type: "submit",
 
-                    React.createElement("option", {
-                        value: "proxy"
-                    }, "Proxy")
-                ),
+        disabled:
+            loading ||
+            !newMonitorName.trim() ||
+            !newMonitorApplication.trim() ||
+            !newMonitorConfiguration.trim(),
 
-                React.createElement("input", {
-                    type: "text",
-                    placeholder:
-                        newMonitorType === "proxy"
-                            ? "Proxy URL / configuration"
-                            : "https://mywebsite.com",
-
-                    value: newMonitorConfiguration,
-
-                    onChange: e =>
-                        setNewMonitorConfiguration(e.target.value),
-
-                    disabled: loading,
-
-                    className:
-                        "flex-1 border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
-                })
-            ),
-
-            // Bottom row
-            React.createElement("div", {
-                className: "flex justify-end"
-            },
-
-                React.createElement(Button, {
-                    type: "submit",
-
-                    disabled:
-                        loading ||
-                        !newMonitorName.trim() ||
-                        !newMonitorApplication.trim() ||
-                        !newMonitorConfiguration.trim(),
-
-                    className:
-                        "bg-primary text-primary-foreground font-semibold " +
-                        "px-4 py-2 hover:bg-primary/90 text-sm cursor-pointer"
-                }, "＋ Add Monitor")
-            )
-        ),
-
-        message && React.createElement("div", {
-            className: "text-xs font-mono text-amber-500 mt-1"
-        }, message)
-    )
+        className:
+            "bg-primary text-primary-foreground font-semibold " +
+            "px-4 h-9 hover:bg-primary/90 text-sm cursor-pointer whitespace-nowrap"
+    }, "＋ Add Monitor")
 ),
 
             React.createElement(Card, null,
