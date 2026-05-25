@@ -1,27 +1,22 @@
-
-
-
-
-
 # Standard Imports
-import json
+import importlib.util
+import pathlib
 
 # External Imports
 from fastapi import APIRouter, Request
 
-# Hermes Imports
-from hermes_cli.config import get_hermes_home
+
+
+
 
 
 # Router
 router = APIRouter()
 
 
-import importlib.util
 
-from pathlib import Path
 
-UTILS_PATH = Path(__file__).resolve().parent.parent / "utils.py"
+UTILS_PATH = pathlib.Path(__file__).resolve().parent.parent / "utils.py"
 
 spec = importlib.util.spec_from_file_location("monitoring_utils", UTILS_PATH)
 
