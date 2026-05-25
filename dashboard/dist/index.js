@@ -348,28 +348,24 @@ function renderOverviewStat(label, value, colourClass) {
                                     "Total",
                                     overviewStats.total,
                                     "text-cyan-400",
-                                    "border-cyan-500/30 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5"
                                 ),
 
                                 renderOverviewStat(
                                     "Online",
                                     overviewStats.up,
                                     "text-cyan-400",
-                                    "border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5"
                                 ),
 
                                 renderOverviewStat(
                                     "Down",
                                     overviewStats.down,
                                     "text-rose-400",
-                                    "border-rose-500/30 bg-gradient-to-br from-rose-500/20 to-rose-500/5"
                                 ),
 
                                 renderOverviewStat(
                                     "Unknown",
                                     overviewStats.unknown,
                                     "text-amber-300",
-                                    "border-amber-500/30 bg-gradient-to-br from-amber-500/20 to-amber-500/5"
                                 )
                             )
                         )
