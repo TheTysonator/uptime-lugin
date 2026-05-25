@@ -14,6 +14,9 @@ router = APIRouter()
 
 from ..utils import _read_monitors, _write_monitors, _add_monitor
 
+print(_read_monitors)
+print(_read_monitors())
+
 
 
 @router.post("/add")
