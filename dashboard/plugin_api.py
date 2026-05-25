@@ -12,11 +12,23 @@ from hermes_cli.config import get_hermes_home
 router = APIRouter()
 
 
-from ..utils import _read_monitors, _write_monitors, _add_monitor
+import importlib.util
 
-print(_read_monitors)
-print(_read_monitors())
+from pathlib import Path
 
+UTILS_PATH = Path(__file__).resolve().parent.parent / "utils.py"
+
+spec = importlib.util.spec_from_file_location("monitoring_utils", UTILS_PATH)
+
+utils = importlib.util.module_from_spec(spec)
+
+spec.loader.exec_module(utils)
+
+_read_monitors = utils._read_monitors
+
+_write_monitors = utils._write_monitors
+
+_add_monitor = utils._add_monitor
 
 
 @router.post("/add")
