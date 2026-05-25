@@ -33,6 +33,14 @@ def _write_monitors ( monitors ):
 
 
 
+import sys
+from pathlib import Path
+
+print("CURRENT FILE:", Path(__file__).resolve())
+print("CURRENT WORKING DIR:", Path.cwd())
+print("PYTHON PATH:")
+for path in sys.path:
+    print(" -", path)
 
 
 
