@@ -361,28 +361,16 @@ function renderOverviewStat(label, value) {
 React.createElement(Card, null,
 
     React.createElement(CardHeader, null,
-        React.createElement("div", {
-            className: "flex items-center justify-between"
-        },
-            React.createElement("h2", {
-                className: "text-xl font-bold tracking-tight"
-            }, "Add Monitor")
+        React.createElement("div", { className: "flex items-center justify-between" },
+            React.createElement("h2", { className: "text-xl font-bold tracking-tight" }, "Add Monitor")
         )
     ),
 
-    React.createElement(CardContent, {
-        className: "flex flex-col gap-4"
-    },
+    React.createElement(CardContent, { className: "flex flex-col gap-4" },
 
-        React.createElement("form", {
-            onSubmit: addMonitor,
-            className: "flex flex-col gap-3 mt-2"
-        },
+        React.createElement("form", { onSubmit: addMonitor, className: "flex flex-col gap-3 mt-2" },
 
-            // Top row
-            React.createElement("div", {
-                className: "grid grid-cols-1 md:grid-cols-2 gap-3"
-            },
+            React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-3" },
 
                 React.createElement("input", {
                     type: "text",
@@ -390,9 +378,7 @@ React.createElement(Card, null,
                     value: newMonitorName,
                     onChange: e => setNewMonitorName(e.target.value),
                     disabled: loading,
-                    className:
-                        "border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
+                    className: "border border-border rounded-md px-3 py-2 text-sm bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
                 }),
 
                 React.createElement("input", {
@@ -401,64 +387,35 @@ React.createElement(Card, null,
                     value: newMonitorApplication,
                     onChange: e => setNewMonitorApplication(e.target.value),
                     disabled: loading,
-                    className:
-                        "border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
+                    className: "border border-border rounded-md px-3 py-2 text-sm bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
                 })
             ),
 
-            // Bottom row
-            React.createElement("div", {
-                className: "flex flex-col md:flex-row items-stretch md:items-center gap-3"
+            React.createElement(Select, {
+                value: newMonitorType,
+                onChange: e => setNewMonitorType(e.target.value),
+                disabled: loading,
+                className: "h-9 w-full"
             },
+                React.createElement("option", { value: "website" }, "Website"),
+                React.createElement("option", { value: "proxy" }, "Proxy")
+            ),
 
-                React.createElement(Select, {
-                    value: newMonitorType,
-                    onChange: e => setNewMonitorType(e.target.value),
-                    disabled: loading,
-                    className: "h-9 md:w-[180px] shrink-0"
-                },
-                    React.createElement("option", {
-                        value: "website"
-                    }, "Website"),
-
-                    React.createElement("option", {
-                        value: "proxy"
-                    }, "Proxy")
-                ),
+            React.createElement("div", { className: "flex items-center gap-3" },
 
                 React.createElement("input", {
                     type: "text",
-
-                    placeholder:
-                        newMonitorType === "proxy"
-                            ? "Proxy URL / configuration"
-                            : "https://mywebsite.com",
-
+                    placeholder: newMonitorType === "proxy" ? "Proxy URL / configuration" : "https://mywebsite.com",
                     value: newMonitorConfiguration,
-
-                    onChange: e =>
-                        setNewMonitorConfiguration(e.target.value),
-
+                    onChange: e => setNewMonitorConfiguration(e.target.value),
                     disabled: loading,
-
-                    className:
-                        "flex-1 border border-border rounded-md px-3 py-2 text-sm " +
-                        "bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
+                    className: "flex-1 min-w-0 border border-border rounded-md px-3 py-2 text-sm bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
                 }),
 
                 React.createElement(Button, {
                     type: "submit",
-
-                    disabled:
-                        loading ||
-                        !newMonitorName.trim() ||
-                        !newMonitorApplication.trim() ||
-                        !newMonitorConfiguration.trim(),
-
-                    className:
-                        "h-9 bg-primary text-primary-foreground font-semibold " +
-                        "px-4 hover:bg-primary/90 text-sm cursor-pointer whitespace-nowrap shrink-0"
+                    disabled: loading || !newMonitorName.trim() || !newMonitorApplication.trim() || !newMonitorConfiguration.trim(),
+                    className: "h-9 px-4 bg-primary text-primary-foreground font-semibold hover:bg-primary/90 text-sm cursor-pointer shrink-0"
                 }, "＋ Add Monitor")
             )
         ),
