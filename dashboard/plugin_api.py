@@ -2,7 +2,7 @@
 import json
 
 # External Imports
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 # Hermes Imports
 from hermes_cli.config import get_hermes_home
@@ -32,7 +32,7 @@ _add_monitor = utils._add_monitor
 
 
 @router.post("/add")
-async def addshit(request):
+async def addshit(request: Request):
     body = await request.json()
 
     monitor_type = body.get("type", "website")
