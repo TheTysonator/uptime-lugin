@@ -328,19 +328,6 @@ function renderOverviewStat(label, value, colourClass) {
                                                 : "All Systems Operational"
                                 ),
 
-                                React.createElement("span", {
-                                    className: "text-base text-muted-foreground max-w-3xl"
-                                },
-                                    overviewStats.total === 0
-                                        ? "Add a monitor below to begin tracking uptime and latency."
-                                        : overviewStats.down > 0
-                                            ? "One or more monitored services are currently experiencing issues and require attention."
-                                            : overviewStats.unknown > 0
-                                                ? "No confirmed outages detected, but some services have not yet reported a healthy state."
-                                                : "Every monitored service is currently healthy and responding normally."
-                                )
-                            ,
-
                             React.createElement("div", {
                                 className: "flex flex-row flex-wrap items-stretch gap-4 w-full"
                             },
