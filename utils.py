@@ -34,10 +34,7 @@ def _write_monitors ( monitors ):
 def _add_monitor ( monitors, application, name, monitor_type, configuration ):
     # Check if Monitor Already Exists
     if f"{ application }:{ name }" in monitors:
-        return json.dumps({
-            "success": False,
-            "message": f"{ name } is already being monitored under { application }."
-        })
+        return monitors, f"{ name } is already being monitored under { application }."
     # Add Monitor
     monitors[f"{ application }:{ name }"] = {
         "type": monitor_type,
@@ -45,4 +42,13 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
         "last_status": "Unknown",
         "ping_history": [-1] * 30
     }
-    return monitors
+    return monitors, ""
+
+
+def _remove_monitor ( monitors, application, name ):
+    # Check if Monitor Exists
+    if f"{ application }:{ name } not in monitors":
+        return monitors, "Not monitored."
+    # Remove Monitor
+    del monitors[f"{ application }:{ name }"]
+    return monitors, ""
