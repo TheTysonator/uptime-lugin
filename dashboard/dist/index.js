@@ -3,7 +3,7 @@
 
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;
-    const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
+    const { Card, CardHeader, CardTitle, CardContent, Button, Select, Badge } = SDK.components;
     const { useState, useEffect } = SDK.hooks;
 
     function PluginPage() {
@@ -365,7 +365,7 @@ function renderOverviewStat(label, value, colourClass) {
             React.createElement(Card, null,
                 React.createElement(CardHeader, null,
                     React.createElement("div", { className: "flex items-center justify-between" },
-                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "Website Uptime Monitor")
+                        React.createElement(CardTitle, { className: "text-xl font-bold" }, "Add Monitor")
                     )
                 ),
 
@@ -385,11 +385,11 @@ function renderOverviewStat(label, value, colourClass) {
                                 className: "border border-border rounded-md px-3 py-2 text-sm bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
                             }),
 
-                            React.createElement("select", {
+                            React.createElement(Select, {
                                 value: newMonitorType,
                                 onChange: e => setNewMonitorType(e.target.value),
                                 disabled: loading,
-                                className: "border border-border rounded-md px-3 py-2 text-sm bg-background/50 h-9 outline-none focus:ring-1 focus:ring-ring"
+                                className: "h-9"
                             },
                                 React.createElement("option", { value: "website" }, "Website"),
                                 React.createElement("option", { value: "proxy" }, "Proxy")
