@@ -303,7 +303,7 @@ function renderOverviewStat(label, value, colourClass) {
                 },
                     React.createElement("div", {
                         className: overviewStats.down > 0
-                            ? "rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-500/15 via-background to-background p-8"
+                            ? "rounded-3xl border border-border bg-gradient-to-br from-rose-500/15 via-background to-background p-8"
                             : overviewStats.unknown > 0
                                 ? "rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 via-background to-background p-8"
                                 : "rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-background to-background p-8"
