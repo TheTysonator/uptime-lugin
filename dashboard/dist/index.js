@@ -271,7 +271,7 @@ function renderOverviewStat(label, value, colourClass) {
             },
 
                 React.createElement("span", {
-                    className: "font-black leading-none " + colourClass,
+                    className: "font-black leading-none ",
                     style: {
                         fontSize: "96px",
                         lineHeight: "0.85",
