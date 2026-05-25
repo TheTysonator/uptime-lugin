@@ -21,7 +21,7 @@ import pathlib
 
 
 # Import Utils
-spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent.parent / "utils.py")
+spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent / "utils.py")
 utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(utils)
 
