@@ -235,7 +235,7 @@ function renderOverviewStat(label, value, colourClass) {
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border border-border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
+            "flex-1 min-w-[260px] rounded-3xl border border-border px-8 py-7 shadow-sm overflow-hidden relative" +
             backgroundClass + " " + borderClass
     },
 

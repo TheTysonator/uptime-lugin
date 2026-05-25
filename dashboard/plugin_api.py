@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 
-# website_monitors.json location and lock location, overview section looks, this file, index, then dashboard done
+# website_monitors.json location and lock location, overview section looks / font / remove extra sentence / boxes / border, this file, index, then dashboard done
 
 
 
