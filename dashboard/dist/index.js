@@ -216,47 +216,43 @@
 
 function renderOverviewStat(label, value, colourClass) {
 
-    let backgroundClass = "bg-zinc-900/70";
-    let glowClass = "";
+    let backgroundClass = "bg-background/40";
+    let borderClass = "border-border";
 
     if (label === "Total") {
-        backgroundClass = "bg-cyan-950/40";
-        glowClass = "shadow-cyan-500/10";
+        backgroundClass = "bg-cyan-500/10";
+        borderClass = "border-cyan-500/20";
     } else if (label === "Online") {
-        backgroundClass = "bg-emerald-950/40";
-        glowClass = "shadow-emerald-500/10";
+        backgroundClass = "bg-emerald-500/10";
+        borderClass = "border-emerald-500/20";
     } else if (label === "Down") {
-        backgroundClass = "bg-rose-950/40";
-        glowClass = "shadow-rose-500/10";
+        backgroundClass = "bg-rose-500/10";
+        borderClass = "border-rose-500/20";
     } else if (label === "Unknown") {
-        backgroundClass = "bg-amber-950/40";
-        glowClass = "shadow-amber-500/10";
+        backgroundClass = "bg-amber-500/10";
+        borderClass = "border-amber-500/20";
     }
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl px-8 py-7 shadow-2xl overflow-hidden relative backdrop-blur-md " +
-            backgroundClass + " " + glowClass
+            "flex-1 min-w-[260px] rounded-3xl border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
+            backgroundClass + " " + borderClass
     },
 
         React.createElement("div", {
-            className: "absolute inset-0 bg-white/[0.02] pointer-events-none"
-        }),
-
-        React.createElement("div", {
-            className: "flex items-center justify-between gap-10 relative z-10"
+            className: "flex items-center justify-between gap-10"
         },
 
             React.createElement("div", {
-                className: "flex flex-col"
+                className: "flex flex-col z-10"
             },
 
                 React.createElement("span", {
-                    className: "text-xs font-black uppercase tracking-[0.3em] text-white/60"
+                    className: "text-xs font-black uppercase tracking-[0.3em] text-muted-foreground"
                 }, label),
 
                 React.createElement("span", {
-                    className: "text-sm text-white/50 mt-3"
+                    className: "text-sm text-muted-foreground mt-3"
                 },
                     label === "Total"
                         ? "Tracked services"
@@ -269,7 +265,7 @@ function renderOverviewStat(label, value, colourClass) {
             ),
 
             React.createElement("div", {
-                className: "pr-4 flex items-center justify-center"
+                className: "pr-4 flex items-center justify-center z-10"
             },
 
                 React.createElement("span", {
