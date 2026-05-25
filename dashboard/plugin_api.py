@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter
 
 
-from utils import _read_monitors, _write_monitors, _add_monitor
+from monitoring.utils import _read_monitors, _write_monitors, _add_monitor
 
 # Router
 router = APIRouter()
