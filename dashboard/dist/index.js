@@ -216,35 +216,33 @@
 
 function renderOverviewStat(label, value, colourClass) {
 
-    let backgroundClass = "bg-background/40";
-    let borderClass = "border-border";
+    let tintClass = "bg-muted/30";
 
     if (label === "Total") {
-        backgroundClass = "bg-cyan-500/10";
-        borderClass = "border-cyan-500/20";
+        tintClass = "bg-cyan-500/15";
     } else if (label === "Online") {
-        backgroundClass = "bg-emerald-500/10";
-        borderClass = "border-emerald-500/20";
+        tintClass = "bg-emerald-500/15";
     } else if (label === "Down") {
-        backgroundClass = "bg-rose-500/10";
-        borderClass = "border-rose-500/20";
+        tintClass = "bg-rose-500/15";
     } else if (label === "Unknown") {
-        backgroundClass = "bg-amber-500/10";
-        borderClass = "border-amber-500/20";
+        tintClass = "bg-amber-500/15";
     }
 
     return React.createElement("div", {
         className:
-            "flex-1 min-w-[260px] rounded-3xl border border-border px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm " +
-            backgroundClass + " "
+            "flex-1 min-w-[260px] rounded-3xl border border-border bg-background/40 px-8 py-7 shadow-sm overflow-hidden relative backdrop-blur-sm"
     },
 
         React.createElement("div", {
-            className: "flex items-center justify-between gap-10"
+            className: "absolute inset-0 pointer-events-none " + tintClass
+        }),
+
+        React.createElement("div", {
+            className: "relative z-10 flex items-center justify-between gap-10"
         },
 
             React.createElement("div", {
-                className: "flex flex-col z-10"
+                className: "flex flex-col"
             },
 
                 React.createElement("span", {
@@ -265,7 +263,7 @@ function renderOverviewStat(label, value, colourClass) {
             ),
 
             React.createElement("div", {
-                className: "pr-4 flex items-center justify-center z-10"
+                className: "pr-4 flex items-center justify-center"
             },
 
                 React.createElement("span", {
