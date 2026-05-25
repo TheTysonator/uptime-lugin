@@ -4,13 +4,31 @@ import json
 # External Imports
 from fastapi import APIRouter
 
+# Hermes Imports
+from hermes_cli.config import get_hermes_home
 
-from monitoring.utils import _read_monitors, _write_monitors, _add_monitor
 
 # Router
 router = APIRouter()
 
 
+# Get Montiors Path
+def _get_monitors_path () :
+    return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
+
+# Read Monitors
+def _read_monitors ():
+    # Get Path
+    path = _get_monitors_path()
+    # Read Monitors
+    return json.loads(path.read_text(encoding = "utf-8"))
+
+# Write Monitors
+def _write_monitors ( monitors ):
+    # Get Path
+    path = _get_monitors_path()
+    # Write Monitors
+    path.write_text(json.dumps(monitors, indent = 4), encoding = "utf-8")
 
 
 
@@ -29,10 +47,56 @@ async def addshit(request):
     app = body.get("application", "").strip()
     configuration = body.get("configuration", "").strip()
 
+    if not name:
+        return {"success": False, "error": "Monitor name is required"}
+
+    if not app:
+        return {"success": False, "error": "Application name is required"}
+
+    if monitor_type not in ("website", "proxy"):
+        return {"success": False, "error": "Monitor type must be website or proxy"}
 
     monitors = _read_monitors()
 
-    _add_monitor(monitors, app, name, monitor_type, configuration)
+    if monitor_type == "website":
+        url = configuration
+
+        if not url.startswith(("http://", "https://")):
+            return {"success": False, "error": "URL must begin with http:// or https://"}
+
+        monitor_id = url
+
+        if monitor_id in monitors:
+            return {"success": True, "message": "Already monitored."}
+
+        monitors[monitor_id] = {
+            "type": "website",
+            "name": name,
+            "app": app,
+            "url": url,
+            "last_status": "UNKNOWN",
+            "ping_history": [-1] * 30
+        }
+
+    elif monitor_type == "proxy":
+        try:
+            proxy_config = json.loads(configuration)
+        except Exception:
+            return {"success": False, "error": "Proxy configuration must be valid JSON"}
+
+        monitor_id = "proxy:" + name
+
+        if monitor_id in monitors:
+            return {"success": True, "message": "Already monitored."}
+
+        monitors[monitor_id] = {
+            "type": "proxy",
+            "name": name,
+            "app": app,
+            "config": proxy_config,
+            "last_status": "UNKNOWN",
+            "ping_history": [-1] * 30
+        }
 
     _write_monitors(monitors)
 
