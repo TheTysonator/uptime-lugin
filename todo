@@ -1,15 +1,9 @@
-Next: tools.py
-And: complete plugin.yaml and 3 tools only
+dashboard/dist/index.js
 
-While: update utils.py functions with validation, strip, alphanumeric, duplicates
-Then: README
+dashboard/plugin_api.py
 
 __init__.py
 README.md
 this
+tools.py
 utils.py
-
-index js
-
-
-CLEAN

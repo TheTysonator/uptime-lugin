@@ -1,9 +1,9 @@
 name: monitoring
 version: 1.0.0
-description: "Monitor web service and proxy uptime with real time alerts."
-author: "Tylan"
+description: "Monitor web services and proxy uptime with real time alerts."
+author: "Tylan Tyson"
 kind: backend
 provides_tools:
-  - add_monitor
-  - remove_monitor
-  - list_monitors
+    - add_monitor
+    - list_monitors
+    - remove_monitor

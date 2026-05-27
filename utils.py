@@ -9,7 +9,7 @@ import json
 from hermes_cli.config import get_hermes_home
 
 
-
+# functions with validation, strip, alphanumeric, duplicates
 
 # Get Montiors Path
 def _get_monitors_path () :

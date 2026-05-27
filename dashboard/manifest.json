@@ -1,7 +1,7 @@
 {
     "name": "monitoring",
     "label": "Monitoring",
-    "description": "Monitor web service and proxy uptime with real time alerts.",
+    "description": "Monitor web services and proxy uptime with real time alerts.",
     "icon": "Activity",
     "version": "1.0.0",
     "tab": {
