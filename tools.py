@@ -91,7 +91,7 @@ REMOVE_MONITOR_SCHEMA = {
 
 
 
-def _handle_add_monitor ( args: dict, **kw ) :
+def _handle_add_monitor ( args: dict, **kw ) -> str:
     # Input Data
     monitor_application = args.get("application")
     monitor_name = args.get("name")
