@@ -1,9 +1,13 @@
+Finish Tomorrow: utils.py and then tools.py - uses hashes for ID's
+Finish Friday: plugin_api.py
+Finish Saturday: __init__.py
+Finish Sunday: index.js
+
 dashboard/dist/index.js
 
 dashboard/plugin_api.py
 
 __init__.py
-README.md
 this
 tools.py
 utils.py
