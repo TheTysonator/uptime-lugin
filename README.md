@@ -7,7 +7,7 @@ The plugin allows Hermes to:
 - Track uptime and latency
 - Manage monitors using AI or the dashboard
 
----
+
 
 ## Features
 
@@ -18,7 +18,7 @@ The plugin allows Hermes to:
 - Hermes tool integration
 - Web dashboard
 
----
+
 
 ## Available Tools
 
@@ -26,7 +26,7 @@ The plugin allows Hermes to:
 - `list_monitors`
 - `remove_monitor`
 
----
+
 
 ## Installation
 
@@ -36,7 +36,7 @@ Install it from the "PLUGINS" tab in your Hermes Agent dashboard or place the pl
 ~/.hermes/plugins/monitoring
 ```
 
----
+
 
 ## Status
 
