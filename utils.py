@@ -40,6 +40,8 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
         return monitors, f"{ name } is already being monitored under { application }."
     # Add Monitor
     monitors[f"{ application }:{ name }"] = {
+        "application": application,
+        "name": name,
         "type": monitor_type,
         "configuration": configuration,
         "ping_history": [-1] * 30
@@ -49,7 +51,7 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
 
 def _remove_monitor ( monitors, application, name ):
     # Check if Monitor Exists
-    if f"{ application }:{ name } not in monitors":
+    if f"{ application }:{ name }" not in monitors:
         return monitors, "Not monitored."
     # Remove Monitor
     del monitors[f"{ application }:{ name }"]
