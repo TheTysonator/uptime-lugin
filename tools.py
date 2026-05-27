@@ -103,17 +103,17 @@ def _handle_add_monitor ( args: dict, **kw ) -> str:
     monitors, error_message = _add_monitor(monitors, monitor_application, monitor_name, monitor_type, monitor_configuration)
     # Handle Error
     if error_message != "":
-        return {
+        return json.dumps({
             "success": False,
-            "message": json.dumps(error_message)
-        }
+            "message": error_message
+        })
     # Write Monitors
     _write_monitors(monitors)
     # Response
-    return {
+    return json.dumps({
         "success": True,
         "message": ""
-    }
+    })
 
 
 
@@ -122,10 +122,10 @@ def _handle_list_monitors ( args: dict, **kw ) -> str :
     # Load Monitors
     monitors = _read_monitors()
     # Return Monitors
-    return {
+    return json.dumps({
         "success": True,
-        "monitors": json.dumps(monitors)
-    }
+        "monitors": monitors
+    })
 
 
 # Handle Remove Monitor
@@ -139,17 +139,17 @@ def _handle_remove_monitor ( args: dict, **kw ) -> str :
     monitors, error_message = _remove_monitor(monitors, monitor_application, monitor_name)
     # Handle Error
     if error_message != "":
-        return {
+        return json.dumps({
             "success": False,
-            "message": json.dumps(error_message)
-        }
+            "message": error_message
+        })
     # Write Monitors
     _write_monitors(monitors)
     # Response
-    return {
+    return json.dumps({
         "success": True,
         "message": ""
-    }
+    })
 
 
 
