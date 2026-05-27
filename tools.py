@@ -18,6 +18,8 @@ spec.loader.exec_module(utils)
 _write_monitors = utils._write_monitors
 _read_monitors = utils._read_monitors
 _get_lock_path = utils._get_lock_path
+_add_monitor = utils._add_monitor
+_remove_monitor = utils._remove_monitor
 
 # --- SCHEMAS ---
 
@@ -26,55 +28,34 @@ _get_lock_path = utils._get_lock_path
 
 
 
-
 # Add Website Monitor Schema
-ADD_WEBSITE_MONITOR_SCHEMA = {
+ADD_MONITOR_SCHEMA = {
     "name": "add_website_monitor",
     "description": "Add a website to be monitored.",
     "parameters": {
         "type": "OBJECT",
         "properties": {
+            "application": {
+                "type": "STRING",
+                "description": "This is the name of the application this monitor is associated with."
+            },
             "name": {
                 "type": "STRING",
                 "description": "This is the name of the monitor."
             },
+            "type": {
+                "type": "STRING",
+                "description": "The type of monitor to add. For website monitoring, this should be 'website'. For proxy monitoring, this should be 'proxy'."
+            },
             "configuration": {
                 "type": "STRING",
-                "description": "The URL of the website to monitor."
-            },
-            "application": {
-                "type": "STRING",
-                "description": "This is the name of the application this monitor is associated with."
+                "description": "The configuration for the monitor. For website monitoring, this should be the URL of the website to monitor. For proxy monitoring, this should be a JSON configuration for hiddify."
             }
         },
-        "required": [ "name", "configuration" ]
+        "required": [ "application", "name", "type", "configuration" ]
     }
 }
 
-
-# Add Proxy Monitor Schema
-ADD_PROXY_MONITOR_SCHEMA = {
-    "name": "add_proxy_monitor",
-    "description": "Add a proxy to be monitored.",
-    "parameters": {
-        "type": "OBJECT",
-        "properties": {
-            "name": {
-                "type": "STRING",
-                "description": "This is the name of the monitor."
-            },
-            "configuration": {
-                "type": "OBJECT",
-                "description": "This is the configuration object for the monitor."
-            },
-            "application": {
-                "type": "STRING",
-                "description": "This is the name of the application this monitor is associated with."
-            }
-        },
-        "required": [ "name", "configuration" ]
-    }
-}
 
 
 # List Monitors Schema
@@ -109,80 +90,31 @@ REMOVE_MONITOR_SCHEMA = {
 }
 
 
-# Handle Add Website Monitor
-def _handle_add_website_monitor ( args: dict, **kw ) -> str :
-    # Input Data
-    name = args.get("name", "").strip()
-    configuration = args.get("configuration", "").strip()
-    application = args.get("application", "Unassigned").strip()
-    # Input Data Validation
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", name):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor name must be an alphanumeric string that can include spaces."
-        })
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", application):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor application must be an alphanumeric string that can include spaces."
-        })
-    # Load Monitors
-    monitors = _read_monitors()
-    # Check For Duplicates
-    if f"{ application}:{ name }" in monitors:
-        return json.dumps({
-            "success": True,
-            "message": f"{ configuration } is already being monitored under { application }."
-        })
-    # Add Monitor
-    monitors[f"{ application }:{ name }"] = {
-        "type": "website",
-        "configuration": configuration,
-        "last_status": "Unknown"
-    }
-    _write_monitors(monitors)
-    return json.dumps({
-        "success": True,
-        "message": f"Successfully added the monitor for { configuration }."}
-    )
 
-
-# Handle Add Proxy Monitor
-def _handle_add_proxy_monitor ( args: dict, **kw ) -> str :
+def _handle_add_monitor ( args: dict, **kw ) :
     # Input Data
-    name = args.get("name", "").strip()
-    configuration = args.get("configuration", "").strip()
-    application = args.get("application", "Unassigned").strip()
-    # Input Data Validation
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", name):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor name must be an alphanumeric string that can include spaces."
-        })
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", application):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor application must be an alphanumeric string that can include spaces."
-        })
-    # Load Monitors
+    monitor_application = args.get("application")
+    monitor_name = args.get("name")
+    monitor_type = args.get("type")
+    monitor_configuration = args.get("configuration")
+    # Read Monitors
     monitors = _read_monitors()
-    # Check For Duplicates
-    if f"{ application }:{ name }" in monitors:
-        return json.dumps({
-            "success": True,
-            "message": f"{ name } is already being monitored under { application }."
-        })
     # Add Monitor
-    monitors[f"{ application }:{ name }"] = {
-        "type": "proxy",
-        "configuration": configuration,
-        "last_status": "Unknown"
-    }
+    monitors, error_message = _add_monitor(monitors, monitor_application, monitor_name, monitor_type, monitor_configuration)
+    # Handle Error
+    if error_message != "":
+        return {
+            "success": False,
+            "message": error_message
+        }
+    # Write Monitors
     _write_monitors(monitors)
-    return json.dumps({
+    # Response
+    return {
         "success": True,
-        "message": f"Successfully added the proxy monitor for the { name }."
-    })
+        "message": ""
+    }
+
 
 
 # Handle List Monitors
@@ -190,40 +122,35 @@ def _handle_list_monitors ( args: dict, **kw ) -> str :
     # Load Monitors
     monitors = _read_monitors()
     # Return Monitors
-    return json.dumps({
+    return {
         "success": True,
         "monitors": monitors
-    })
+    }
 
 
 # Handle Remove Monitor
 def _handle_remove_monitor ( args: dict, **kw ) -> str :
     # Input Data
-    name = args.get("name", "").strip()
-    application = args.get("application", "").strip()
-    # Input Data Validation
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", name):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor name must be an alphanumeric string that can include spaces."
-        })
-    if not re.fullmatch(r"^[a-zA-Z0-9 ]+$", application):
-        return json.dumps({
-            "success": False,
-            "error": "Monitor application must be an alphanumeric string that can include spaces."
-        })
-    # Load Monitors
+    monitor_application = args.get("application")
+    monitor_name = args.get("name")
+    # Read Monitors
     monitors = _read_monitors()
-    # Find Monitor
-    if f"{ application }:{ name }" not in monitors:
-        return json.dumps({
-            "success": True,
-            "error": f"{ name } is not in the monitored under { application }."
-        })
     # Remove Monitor
-    del monitors[f"{ application }:{ name }"]
+    monitors, error_message = _remove_monitor(monitors, monitor_application, monitor_name)
+    # Handle Error
+    if error_message != "":
+        return {
+            "success": False,
+            "message": error_message
+        }
+    # Write Monitors
     _write_monitors(monitors)
-    return json.dumps({
+    # Response
+    return {
         "success": True,
-        "message": f"Successfully removed { name } from being monitored."
-    })
+        "message": ""
+    }
+
+
+
+

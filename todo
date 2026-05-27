@@ -1,13 +1,15 @@
 Next: tools.py
-While: update utils.py functions with validation
 And: complete plugin.yaml and 3 tools only
+
+While: update utils.py functions with validation, strip, alphanumeric, duplicates
 Then: README
 
 __init__.py
-plugin.yaml
 README.md
 this
-tools.py
 utils.py
 
 index js
+
+
+CLEAN

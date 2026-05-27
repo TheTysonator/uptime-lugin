@@ -314,31 +314,22 @@ def _background_monitor_loop(ctx) -> None:
 def register(ctx) -> None:
     """Registers tools and starts the background monitoring thread."""
     from .tools import (
-        ADD_WEBSITE_MONITOR_SCHEMA,
-        ADD_PROXY_MONITOR_SCHEMA,
+        ADD_MONITOR_SCHEMA,
         REMOVE_MONITOR_SCHEMA,
         LIST_MONITORS_SCHEMA,
-        _handle_add_website_monitor,
-        _handle_add_proxy_monitor,
+        _handle_add_monitor,
         _handle_remove_monitor,
         _handle_list_monitors,
     )
 
     ctx.register_tool(
-        name="add_website_monitor",
+        name="add_monitor",
         toolset="uptime",
-        schema=ADD_WEBSITE_MONITOR_SCHEMA,
-        handler=_handle_add_website_monitor,
+        schema=ADD_MONITOR_SCHEMA,
+        handler=_handle_add_monitor,
         emoji="➕",
     )
 
-    ctx.register_tool(
-        name="add_proxy_monitor",
-        toolset="uptime",
-        schema=ADD_PROXY_MONITOR_SCHEMA,
-        handler=_handle_add_proxy_monitor,
-        emoji="🧦",
-    )
 
     ctx.register_tool(
         name="remove_monitor",

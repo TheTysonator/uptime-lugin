@@ -4,7 +4,6 @@ description: "Monitor web service and proxy uptime with real time alerts."
 author: "Tylan"
 kind: backend
 provides_tools:
-  - add_proxy_monitor
-  - add_website_monitor
+  - add_monitor
   - remove_monitor
   - list_monitors
