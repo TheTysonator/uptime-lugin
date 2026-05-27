@@ -30,7 +30,7 @@ The plugin allows Hermes to:
 
 ## Installation
 
-Install it from the "PLUGINS" tab in your Hermes Agent dashboard or place the plugin inside your Hermes plugins directory:
+Install it from the plugins tab in your Hermes Agent dashboard or place the plugin inside your Hermes plugins directory:
 
 ```bash
 ~/.hermes/plugins/monitoring
@@ -40,4 +40,4 @@ Install it from the "PLUGINS" tab in your Hermes Agent dashboard or place the pl
 
 ## Status
 
-Ready to be used but a work in progress. Breaking changes may come.
+Usable, but still a work in progress. Breaking changes may occur.
