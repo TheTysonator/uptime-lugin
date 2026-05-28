@@ -1,34 +1,15 @@
-
-
-
-
+# Standard Imports
 import json
 
+# Custom Imports
+from .utils import _write_monitors, _read_monitors, _add_monitor, _remove_monitor
 
 
 
-
-from .utils import (
-    _write_monitors,
-    _read_monitors,
-    _add_monitor,
-    _remove_monitor
-)
-
-
-
-
-# --- SCHEMAS ---
-
-
-
-
-
-
-# Add Website Monitor Schema
+# Add Monitor Schema
 ADD_MONITOR_SCHEMA = {
-    "name": "add_website_monitor",
-    "description": "Add a website to be monitored.",
+    "name": "add_monitor",
+    "description": "Add a service to be monitored.",
     "parameters": {
         "type": "OBJECT",
         "properties": {
@@ -46,25 +27,22 @@ ADD_MONITOR_SCHEMA = {
             },
             "configuration": {
                 "type": "STRING",
-                "description": "The configuration for the monitor. For website monitoring, this should be the URL of the website to monitor. For proxy monitoring, this should be a JSON configuration for hiddify."
+                "description": "The configuration for the monitor. For website monitoring, this should be the URL of the service to monitor. For proxy monitoring, this should be a JSON configuration for hiddify."
             }
         },
-        "required": [ "application", "name", "type", "configuration" ]
+        "required": [ "name", "type", "configuration" ]
     }
 }
-
-
 
 # List Monitors Schema
 LIST_MONITORS_SCHEMA = {
     "name": "list_monitors",
-    "description": "List all monitored websites and proxies.",
+    "description": "List all monitored services.",
     "parameters": {
         "type": "OBJECT",
         "properties": {}
     }
 }
-
 
 # Remove Monitor Schema
 REMOVE_MONITOR_SCHEMA = {
@@ -73,21 +51,22 @@ REMOVE_MONITOR_SCHEMA = {
     "parameters": {
         "type": "OBJECT",
         "properties": {
-            "name": {
-                "type": "STRING",
-                "description": "The name of the monitor to remove."
-            },
             "application": {
                 "type": "STRING",
                 "description": "The application associated with the monitor to remove."
+            },
+            "name": {
+                "type": "STRING",
+                "description": "The name of the monitor to remove."
             }
         },
-        "required": [ "name", "application" ]
+        "required": [ "application", "name" ]
     }
 }
 
 
 
+# Handle Add Monitor
 def _handle_add_monitor ( args: dict, **kw ) -> str:
     # Input Data
     monitor_application = args.get("application")
@@ -112,8 +91,6 @@ def _handle_add_monitor ( args: dict, **kw ) -> str:
         "message": ""
     })
 
-
-
 # Handle List Monitors
 def _handle_list_monitors ( args: dict, **kw ) -> str :
     # Load Monitors
@@ -123,7 +100,6 @@ def _handle_list_monitors ( args: dict, **kw ) -> str :
         "success": True,
         "monitors": monitors
     })
-
 
 # Handle Remove Monitor
 def _handle_remove_monitor ( args: dict, **kw ) -> str :
@@ -147,7 +123,3 @@ def _handle_remove_monitor ( args: dict, **kw ) -> str :
         "success": True,
         "message": ""
     })
-
-
-
-
