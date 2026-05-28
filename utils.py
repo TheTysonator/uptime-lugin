@@ -1,66 +1,76 @@
-
-
-
 # Standard Imports
-import json
-
 import hashlib
-
+import json
 
 # Hermes Imports
 from hermes_cli.config import get_hermes_home
 
 
 
-def _generate_id ( data: str ) -> str:
-    return hashlib.blake2s(data.lower().strip().encode(), digest_size = 8).hexdigest()
+# Generate ID
+def __generate_id ( data ):
+    return hashlib.blake2s(data.lower().strip().encode(), digest_size = 32).hexdigest()
 
-
-
-# functions with validation, strip, alphanumeric, duplicates
-
-# Get Montiors Path
-def _get_monitors_path () :
+# Get Monitors Path
+def __get_monitors_path ():
     return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
-def _get_lock_path() :
-    return get_hermes_home() / "plugins" / "monitoring" / "monitor.lock"
+# Get Lock Path
+def __get_lock_path ():
+    return get_hermes_home() / "plugins" / "monitoring" / "monitors.lock"
 
-# Read Monitors
-def _read_monitors ():
-    # Get Path
-    path = _get_monitors_path()
-    # Read Monitors
-    return json.loads(path.read_text(encoding = "utf-8"))
+
 
 # Write Monitors
 def _write_monitors ( monitors ):
     # Get Path
-    path = _get_monitors_path()
+    path = __get_monitors_path()
     # Write Monitors
     path.write_text(json.dumps(monitors, indent = 4), encoding = "utf-8")
 
+# Read Monitors
+def _read_monitors ():
+    # Get Path
+    path = __get_monitors_path()
+    # Read Monitors
+    return json.loads(path.read_text(encoding = "utf-8"))
 
-
+# Add Monitor
 def _add_monitor ( monitors, application, name, monitor_type, configuration ):
-    # Check if Monitor Already Exists
-    if _generate_id(f"{ application }:{ name }") in monitors:
-        return monitors, f"{ name } is already being monitored under { application }."
+    # Validate Application
+    if application.strip() != "":
+        if application.replace(" ", "").isalnum() == False:
+            return monitors, "Application name must be alphanumeric."
+    else:
+        application = "Uncategorized"
+    # Validate Name
+    if name.strip() == "":
+        return monitors, "Name can not be empty."
+    # Validate Monitor Type
+    if monitor_type not in ("website", "proxy"):
+        return monitors, "Invalid monitor type."
+    # Validate Configuration
+    if not configuration.strip():
+        return monitors, "Configuration can not be empty."
+    # Check If The Monitor Already Exists
+    if __generate_id(f"{ application.strip() }:{ name.strip() }") in monitors:
+        return monitors, f"{ name.strip() } is already being monitored under { application.strip() }."
     # Add Monitor
-    monitors[_generate_id(f"{ application }:{ name }")] = {
-        "application": application,
-        "name": name,
+    monitors[__generate_id(f"{ application.strip() }:{ name.strip() }")] = {
+        "application": application.strip(),
+        "name": name.strip(),
         "type": monitor_type,
-        "configuration": configuration,
+        "configuration": configuration.strip(),
         "ping_history": [-1] * 30
     }
+    # Return Monitors
     return monitors, ""
 
-
+# Remove Monitor
 def _remove_monitor ( monitors, application, name ):
     # Check if Monitor Exists
-    if _generate_id(f"{ application }:{ name }") not in monitors:
+    if __generate_id(f"{ application.strip() }:{ name.strip() }") not in monitors:
         return monitors, "Not monitored."
     # Remove Monitor
-    del monitors[_generate_id(f"{ application }:{ name }")]
+    del monitors[__generate_id(f"{ application.strip() }:{ name.strip() }")]
     return monitors, ""
