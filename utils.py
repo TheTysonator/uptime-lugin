@@ -4,9 +4,17 @@
 # Standard Imports
 import json
 
+import hashlib
+
 
 # Hermes Imports
 from hermes_cli.config import get_hermes_home
+
+
+
+def _generate_id ( data: str ) -> str:
+    return hashlib.blake2s(data.lower().strip().encode(), digest_size = 8).hexdigest()
+
 
 
 # functions with validation, strip, alphanumeric, duplicates
@@ -36,10 +44,10 @@ def _write_monitors ( monitors ):
 
 def _add_monitor ( monitors, application, name, monitor_type, configuration ):
     # Check if Monitor Already Exists
-    if f"{ application }:{ name }" in monitors:
+    if _generate_id(f"{ application }:{ name }") in monitors:
         return monitors, f"{ name } is already being monitored under { application }."
     # Add Monitor
-    monitors[f"{ application }:{ name }"] = {
+    monitors[_generate_id(f"{ application }:{ name }")] = {
         "application": application,
         "name": name,
         "type": monitor_type,
@@ -51,8 +59,8 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
 
 def _remove_monitor ( monitors, application, name ):
     # Check if Monitor Exists
-    if f"{ application }:{ name }" not in monitors:
+    if _generate_id(f"{ application }:{ name }") not in monitors:
         return monitors, "Not monitored."
     # Remove Monitor
-    del monitors[f"{ application }:{ name }"]
+    del monitors[_generate_id(f"{ application }:{ name }")]
     return monitors, ""
