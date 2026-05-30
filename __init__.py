@@ -1,6 +1,14 @@
 # Standard Imports
 
 
+from .tools import (
+    ADD_MONITOR_SCHEMA,
+    REMOVE_MONITOR_SCHEMA,
+    LIST_MONITORS_SCHEMA,
+    _handle_add_monitor,
+    _handle_remove_monitor,
+    _handle_list_monitors,
+)
 
 
 
@@ -311,41 +319,39 @@ def _background_monitor_loop(ctx) -> None:
         time.sleep(60)
 
 
-def register(ctx) -> None:
-    """Registers tools and starts the background monitoring thread."""
-    from .tools import (
-        ADD_MONITOR_SCHEMA,
-        REMOVE_MONITOR_SCHEMA,
-        LIST_MONITORS_SCHEMA,
-        _handle_add_monitor,
-        _handle_remove_monitor,
-        _handle_list_monitors,
-    )
-
-    ctx.register_tool(
-        name="add_monitor",
-        toolset="uptime",
-        schema=ADD_MONITOR_SCHEMA,
-        handler=_handle_add_monitor,
-        emoji="➕",
-    )
 
 
-    ctx.register_tool(
-        name="remove_monitor",
-        toolset="uptime",
-        schema=REMOVE_MONITOR_SCHEMA,
-        handler=_handle_remove_monitor,
-        emoji="❌",
+# Register
+def register ( context ) :
+    # Register Add Monitor Tool
+    context.register_tool(
+        toolset = "uptime",
+        name = "add_monitor",
+        schema = ADD_MONITOR_SCHEMA,
+        handler = _handle_add_monitor,
+        emoji = "🆕"
     )
+    # Register List Monitors Tool
+    context.register_tool(
+        toolset = "uptime",
+        name = "list_monitors",
+        schema = LIST_MONITORS_SCHEMA,
+        handler = _handle_list_monitors,
+        emoji = "📋"
+    )
+    # Register Remove Monitor Tool
+    context.register_tool(
+        toolset = "uptime",
+        name = "remove_monitor",
+        schema = REMOVE_MONITOR_SCHEMA,
+        handler = _handle_remove_monitor,
+        emoji = "🗑️"
+    )
+    # Check Background Thread
 
-    ctx.register_tool(
-        name="list_monitors",
-        toolset="uptime",
-        schema=LIST_MONITORS_SCHEMA,
-        handler=_handle_list_monitors,
-        emoji="📋",
-    )
+
+
+
 
     with builtins._hermes_uptime_thread_lock:
         if builtins._hermes_uptime_thread_started:
@@ -354,7 +360,7 @@ def register(ctx) -> None:
 
         monitor_thread = threading.Thread(
             target=_background_monitor_loop,
-            args=(ctx,),
+            args=(context,),
             daemon=True,
         )
 
