@@ -24,27 +24,19 @@ router = APIRouter()
 
 
 # Add Monitor
-
-
-
-
-
-
-
-
-# Add Monitor
 @router.post("/add_monitor")
 async def _handle_add_monitor ( request: Request ):
     # Get Request JSON
     request_json = await request.json()
-    request_application = request_json.get("application", "")
-    request_name = request_json.get("name", "")
-    request_type = request_json.get("type", "")
-    request_configuration = request_json.get("configuration", "")
+    # Input Data
+    monitor_application = request_json.get("application", "")
+    monitor_name = request_json.get("name", "")
+    monitor_type = request_json.get("type", "")
+    monitor_configuration = request_json.get("configuration", "")
     # Read Monitors
     monitors = _read_monitors()
     # Add Monitor
-    monitors, error_message = _add_monitor(monitors, request_application, request_name, request_type, request_configuration)
+    monitors, error_message = _add_monitor(monitors, monitor_application, monitor_name, monitor_type, monitor_configuration)
     # Handle Error
     if error_message != "":
         return {
@@ -59,32 +51,30 @@ async def _handle_add_monitor ( request: Request ):
         "message": ""
     }
 
-
-
-
-
-# Get Monitors
-@router.get("/get")
-async def status ():
+# List Monitors
+@router.get("/list_monitors")
+async def _handle_list_monitors ():
     # Read Monitors
     monitors = _read_monitors()
     # Response
     return {
         "success": True,
+        "message": "",
         "monitors": monitors
     }
 
 # Remove Monitor
-@router.post("/remove")
-async def remove ( request: Request ):
+@router.post("/remove_monitor")
+async def _handle_remove_monitor ( request: Request ):
     # Get Request JSON
     request_json = await request.json()
-    request_application = request_json.get("application", "")
-    request_name = request_json.get("name", "")
+    # Input Data
+    monitor_application = request_json.get("application", "")
+    monitor_name = request_json.get("name", "")
     # Read Monitors
     monitors = _read_monitors()
     # Remove Monitor
-    monitors, error_message = _remove_monitor(monitors, request_application, request_name)
+    monitors, error_message = _remove_monitor(monitors, monitor_application, monitor_name)
     # Handle Error
     if error_message != "":
         return {

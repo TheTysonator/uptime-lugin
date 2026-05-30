@@ -69,10 +69,10 @@ REMOVE_MONITOR_SCHEMA = {
 # Handle Add Monitor
 def _handle_add_monitor ( args: dict, **kw ) -> str:
     # Input Data
-    monitor_application = args.get("application")
-    monitor_name = args.get("name")
-    monitor_type = args.get("type")
-    monitor_configuration = args.get("configuration")
+    monitor_application = args.get("application", "")
+    monitor_name = args.get("name", "")
+    monitor_type = args.get("type", "")
+    monitor_configuration = args.get("configuration", "")
     # Read Monitors
     monitors = _read_monitors()
     # Add Monitor
@@ -93,9 +93,9 @@ def _handle_add_monitor ( args: dict, **kw ) -> str:
 
 # Handle List Monitors
 def _handle_list_monitors ( args: dict, **kw ) -> str :
-    # Load Monitors
+    # Read Monitors
     monitors = _read_monitors()
-    # Return Monitors
+    # Response
     return json.dumps({
         "success": True,
         "monitors": monitors

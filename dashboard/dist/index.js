@@ -50,7 +50,7 @@
         function getMonitors() {
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/monitoring/get").then(data => {
+            SDK.fetchJSON("/api/plugins/monitoring/list_monitors").then(data => {
                 if (data && data.success) {
                     setMonitors(data.monitors || {});
                 } else {
@@ -69,7 +69,7 @@
 
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/monitoring/remove", {
+            SDK.fetchJSON("/api/plugins/monitoring/remove_monitor", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: monitorId })
