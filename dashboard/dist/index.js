@@ -20,7 +20,7 @@
             event.preventDefault();
             setLoading(true);
 
-            SDK.fetchJSON("/api/plugins/monitoring/add", {
+            SDK.fetchJSON("/api/plugins/monitoring/add_monitor", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
