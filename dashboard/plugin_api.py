@@ -1,3 +1,9 @@
+
+
+
+
+
+
 # Standard Imports
 import importlib.util
 import pathlib
@@ -5,16 +11,11 @@ import pathlib
 # External Imports
 from fastapi import APIRouter, Request
 
-# Import Utils
-spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent.parent / "utils.py")
-utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils)
 
-# Imported Functions
-_write_monitors = utils._write_monitors
-_read_monitors = utils._read_monitors
-_add_monitor = utils._add_monitor
-_remove_monitor = utils._remove_monitor
+
+
+
+from ..utils import _write_monitors, _read_monitors, _add_monitor, _remove_monitor
 
 
 # Router
