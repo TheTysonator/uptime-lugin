@@ -11,27 +11,27 @@ from hermes_cli.config import get_hermes_home
 def __generate_id ( data ):
     return hashlib.blake2s(data.lower().strip().encode(), digest_size = 32).hexdigest()
 
+
+
 # Get Monitors Path
-def __get_monitors_path ():
+def _get_monitors_path ():
     return get_hermes_home() / "plugins" / "monitoring" / "monitors.json"
 
 # Get Lock Path
-def __get_lock_path ():
+def _get_lock_path ():
     return get_hermes_home() / "plugins" / "monitoring" / "monitors.lock"
-
-
 
 # Write Monitors
 def _write_monitors ( monitors ):
     # Get Path
-    path = __get_monitors_path()
+    path = _get_monitors_path()
     # Write Monitors
     path.write_text(json.dumps(monitors, indent = 4), encoding = "utf-8")
 
 # Read Monitors
 def _read_monitors ():
     # Get Path
-    path = __get_monitors_path()
+    path = _get_monitors_path()
     # Read Monitors
     return json.loads(path.read_text(encoding = "utf-8"))
 
