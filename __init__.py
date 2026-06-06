@@ -335,6 +335,6 @@ def register ( context ) :
     # Start Background Thread
     threading.Thread(
         target = _background_monitor_loop,
-        args = (context),
+        args = (context,),
         daemon = True
     ).start()
