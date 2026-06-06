@@ -1,6 +1,21 @@
 # Standard Imports
 
 
+
+import fcntl
+import json
+import logging
+import subprocess
+import tempfile
+import threading
+import time
+import urllib.request
+
+
+import pathlib
+
+# Custom Imports 
+
 from .tools import (
     ADD_MONITOR_SCHEMA,
     REMOVE_MONITOR_SCHEMA,
@@ -12,47 +27,12 @@ from .tools import (
 
 
 
-
-import builtins
-import fcntl
-import json
-import logging
-import subprocess
-import tempfile
-import threading
-import time
-import urllib.request
-
-
-import importlib.util
-import pathlib
-
-
-# Import Utils
-spec = importlib.util.spec_from_file_location("monitoring_utils", pathlib.Path(__file__).resolve().parent / "utils.py")
-utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils)
-
-# Imported Functions
-_write_monitors = utils._write_monitors
-_read_monitors = utils._read_monitors
-_get_lock_path = utils._get_lock_path
+from .utils import _write_monitors, _read_monitors, _get_lock_path
 
 
 
 
 logger = logging.getLogger(__name__)
-
-
-
-
-if not hasattr(builtins, "_hermes_uptime_thread_started"):
-    builtins._hermes_uptime_thread_started = False
-
-if not hasattr(builtins, "_hermes_uptime_thread_lock"):
-    builtins._hermes_uptime_thread_lock = threading.Lock()
-
-
 
 
 
@@ -210,9 +190,9 @@ def _check_proxy(name, config):
                 pass
 
 
-def _send_alert(ctx, target_room, message) -> None:
+def _send_alert(context, target_room, message) -> None:
     try:
-        result = ctx.dispatch_tool(
+        result = context.dispatch_tool(
             "send_message",
             {
                 "target": target_room,
@@ -226,97 +206,102 @@ def _send_alert(ctx, target_room, message) -> None:
         logger.exception("Failed to dispatch website monitor alert")
 
 
-def _background_monitor_loop(ctx) -> None:
-    lock_path = _get_lock_path()
-    lock_file = lock_path.open("w")
 
+
+
+
+# Background Monitor Loop
+def _background_monitor_loop ( context ):
+    # Lock File
+    lock_file = _get_lock_path().open("w")
+    # Check Lock
     try:
         fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
-        logger.warning("Another uptime monitor loop is already running. Exiting duplicate thread.")
         return
-
-    time.sleep(15)
-
-    logger.warning(f"RUNNING UPTIME LOOP FROM FILE: {__file__}")
-    logger.info("Website Monitor background thread started successfully.")
-
-    target_room = "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh"
-
+    # Monitor Loop
     while True:
-        try:
-            monitors = _read_monitors()
-            changed = False
+        # Read Monitors
+        monitors = _read_monitors()
 
-            for monitor_id, info in list(monitors.items()):
-                if not isinstance(info, dict):
-                    logger.warning(f"Skipping malformed monitor: {monitor_id}")
+
+
+
+        for monitor_id, info in list(monitors.items()):
+
+
+            if not isinstance(info, dict):
+                logger.warning(f"Skipping malformed monitor: {monitor_id}")
+                continue
+        
+            logger.info(f"TYPE: {info.get('type')}")
+
+            if monitor_id.startswith("proxy:"):
+                monitor_type = "proxy"
+            else:
+                monitor_type = info.get("type", "website")
+
+
+
+
+            latency_ms = -1
+
+            if monitor_type == "proxy":
+                name = info.get("name", monitor_id.replace("proxy:", ""))
+                config = info.get("config", {})
+
+                is_up, latency_ms = _check_proxy(name, config)
+                display_name = name
+                alert_title = "PROXY MONITOR ALERT"
+
+            elif monitor_type == "website":
+                configuration = info.get("configuration")
+
+                if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
+                    logger.warning(
+                        f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
+                    )
                     continue
 
-                if monitor_id.startswith("proxy:"):
-                    monitor_type = "proxy"
-                else:
-                    monitor_type = info.get("type", "website")
+                is_up, latency_ms = _check_website(configuration)
+                display_name = info.get("name", monitor_id)
+                alert_title = "WEBSITE UPTIME MONITOR ALERT"
 
-                latency_ms = -1
+            else:
+                logger.warning(f"Skipping unknown monitor type for {monitor_id}: {monitor_type}")
+                continue
 
-                if monitor_type == "proxy":
-                    name = info.get("name", monitor_id.replace("proxy:", ""))
-                    config = info.get("config", {})
+            current_status = "UP" if is_up else "DOWN"
+            old_status = info.get("last_status", "UNKNOWN")
 
-                    is_up, latency_ms = _check_proxy(name, config)
-                    display_name = name
-                    alert_title = "PROXY MONITOR ALERT"
+            _record_ping(monitors[monitor_id], latency_ms)
 
-                elif monitor_type == "website":
-                    configuration = info.get("configuration")
 
-                    if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
-                        logger.warning(
-                            f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
-                        )
-                        continue
+            if current_status != old_status:
+                monitors[monitor_id]["last_status"] = current_status
 
-                    is_up, latency_ms = _check_website(configuration)
-                    display_name = info.get("name", monitor_id)
-                    alert_title = "WEBSITE UPTIME MONITOR ALERT"
+                logger.info(
+                    f"Monitor status changed for {display_name}: "
+                    f"{old_status} -> {current_status}"
+                )
 
-                else:
-                    logger.warning(f"Skipping unknown monitor type for {monitor_id}: {monitor_type}")
-                    continue
+                if old_status != "UNKNOWN":
+                    alert_icon = "🟢" if is_up else "🔴"
 
-                current_status = "UP" if is_up else "DOWN"
-                old_status = info.get("last_status", "UNKNOWN")
-
-                _record_ping(monitors[monitor_id], latency_ms)
-                changed = True
-
-                if current_status != old_status:
-                    monitors[monitor_id]["last_status"] = current_status
-
-                    logger.info(
-                        f"Monitor status changed for {display_name}: "
-                        f"{old_status} -> {current_status}"
+                    alert_msg = (
+                        f"{alert_icon} **{alert_title}**\n\n"
+                        f"**{display_name}** went from "
+                        f"**{old_status}** ➡️ **{current_status}**!"
                     )
 
-                    if old_status != "UNKNOWN":
-                        alert_icon = "🟢" if is_up else "🔴"
+                    _send_alert(context, "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh", alert_msg)
 
-                        alert_msg = (
-                            f"{alert_icon} **{alert_title}**\n\n"
-                            f"**{display_name}** went from "
-                            f"**{old_status}** ➡️ **{current_status}**!"
-                        )
+        _write_monitors(monitors)
 
-                        _send_alert(ctx, target_room, alert_msg)
 
-            if changed:
-                _write_monitors(monitors)
-
-        except Exception:
-            logger.exception("Error in Website Monitor loop")
 
         time.sleep(60)
+
 
 
 
@@ -347,24 +332,9 @@ def register ( context ) :
         handler = _handle_remove_monitor,
         emoji = "🗑️"
     )
-    # Check Background Thread
-
-
-
-
-
-    with builtins._hermes_uptime_thread_lock:
-        if builtins._hermes_uptime_thread_started:
-            logger.info("Website Monitor background thread already running globally; skipping duplicate start.")
-            return
-
-        monitor_thread = threading.Thread(
-            target=_background_monitor_loop,
-            args=(context,),
-            daemon=True,
-        )
-
-        monitor_thread.start()
-        builtins._hermes_uptime_thread_started = True
-
-    logger.info("Website Monitor background thread registered successfully.")
+    # Start Background Thread
+    threading.Thread(
+        target = _background_monitor_loop,
+        args = (context),
+        daemon = True
+    ).start()
