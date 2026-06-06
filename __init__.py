@@ -35,18 +35,6 @@ from .utils import _write_monitors, _read_monitors, _get_lock_path
 logger = logging.getLogger(__name__)
 
 
-
-
-def _record_ping(info, latency_ms: int) -> None:
-    history = info.get("ping_history", [])
-
-    if not isinstance(history, list):
-        history = []
-
-    history.append(latency_ms)
-    info["ping_history"] = history[-30:]
-
-
 def _check_website(url):
     start_time = time.time()
 
@@ -208,7 +196,6 @@ def _send_alert(context, target_room, message) -> None:
 
 
 def _check_monitor(monitor_id, monitor):
-    latency_ms = -1
 
     monitor_type = monitor.get("type", "")
 
@@ -218,35 +205,41 @@ def _check_monitor(monitor_id, monitor):
 
         is_up, latency_ms = _check_proxy(name, config)
 
-        return {
-            "monitor_id": monitor_id,
-            "is_up": is_up,
-            "latency_ms": latency_ms,
-            "display_name": name,
-            "alert_title": "PROXY MONITOR ALERT",
-        }
-
-    if monitor_type == "website":
+    elif monitor_type == "website":
         configuration = monitor.get("configuration")
 
         if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
             logger.warning(
                 f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
             )
-            return None
+
+            return {
+                "id": monitor_id,
+                "name": monitor.get("name", monitor_id),
+                "application": monitor.get("application", ""),
+                "ping": -1
+            }
 
         is_up, latency_ms = _check_website(configuration)
 
+    else:
+        logger.warning(
+            f"Skipping unknown monitor type for {monitor_id}: {monitor_type}"
+        )
+
         return {
-            "monitor_id": monitor_id,
-            "is_up": is_up,
-            "latency_ms": latency_ms,
-            "display_name": monitor.get("name", monitor_id),
-            "alert_title": "WEBSITE UPTIME MONITOR ALERT",
+            "id": monitor_id,
+            "name": monitor.get("name", monitor_id),
+            "application": monitor.get("application", ""),
+            "ping": -1
         }
 
-    logger.warning(f"Skipping unknown monitor type for {monitor_id}: {monitor_type}")
-    return None
+    return {
+        "id": monitor_id,
+        "name": monitor.get("name", monitor_id),
+        "application": monitor.get("application", ""),
+        "ping": latency_ms if is_up else -2
+    }
 
 
 
@@ -261,55 +254,54 @@ def _background_monitor_loop ( context ):
     except BlockingIOError:
         return
     # Monitor Loop
-
-
-
     while True:
+        # Read Monitors
         monitors = _read_monitors()
-
-        with ThreadPoolExecutor(max_workers=min(10, len(monitors))) as executor:
-            futures = [
-                executor.submit(_check_monitor, monitor_id, monitor)
-                for monitor_id, monitor in monitors.items()
-            ]
-
+        # No Monitors
+        if not monitors:
+            time.sleep(60)
+            continue
+        # Thread Pool Executor
+        with ThreadPoolExecutor(max_workers = min(10, len(monitors))) as executor:
+            # Futures
+            futures = [ executor.submit(_check_monitor, monitor_id, monitor) for monitor_id, monitor in monitors.items() ]
+            # Process Results
             for future in as_completed(futures):
-                result = future.result()
-
-                if result is None:
-                    continue
-
-                monitor_id = result["monitor_id"]
-                is_up = result["is_up"]
-                latency_ms = result["latency_ms"]
-                display_name = result["display_name"]
-                alert_title = result["alert_title"]
-
+                # Get Result Data
+                monitor_id = future.result().get("id", "")
+                monitor_name = future.result().get("name", "")
+                monitor_application = future.result().get("application", "")
+                monitor_ping = future.result().get("ping", -2)
+                # Monitor
                 monitor = monitors[monitor_id]
+                # Update Monitor
+                ping_history = monitor.get("ping_history", [])
+                ping_history.append(monitor_ping)
+                monitor["ping_history"] = ping_history[-30:]
 
-                current_status = "UP" if is_up else "DOWN"
-                old_status = monitor.get("last_status", "UNKNOWN")
 
-                _record_ping(monitor, latency_ms)
 
-                if current_status != old_status:
-                    monitor["last_status"] = current_status
+                # Check Ping History, number of entries and if last entry was not recorded
+
+                if (monitor_ping >= 0 and ping_history[-2] < 0) or (monitor_ping < 0 and ping_history[-2] >= 0):
 
                     logger.info(
-                        f"Monitor status changed for {display_name}: "
-                        f"{old_status} -> {current_status}"
+                        f"Monitor status changed for {monitor_name}: "
+                        f"{ping_history[-2]} -> {monitor_ping}"
                     )
 
-                    if old_status != "UNKNOWN":
-                        alert_icon = "🟢" if is_up else "🔴"
+                    if ping_history[-2] != "UNKNOWN":
+                        alert_icon = "🟢" if monitor_ping >= 0 else "🔴"
 
                         alert_msg = (
-                            f"{alert_icon} **{alert_title}**\n\n"
-                            f"**{display_name}** went from "
-                            f"**{old_status}** ➡️ **{current_status}**!"
+                            f"{alert_icon} **{'Alert'}**\n\n"
+                            f"**{monitor_name}** went from "
+                            f"**{ping_history[-2]}** ➡️ **{monitor_ping}**!"
                         )
 
                         _send_alert(context, "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh", alert_msg)
+
+
 
         _write_monitors(monitors)
 
