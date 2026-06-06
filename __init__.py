@@ -11,7 +11,7 @@ import threading
 import time
 import urllib.request
 
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import pathlib
 
 # Custom Imports 
@@ -207,6 +207,47 @@ def _send_alert(context, target_room, message) -> None:
 
 
 
+def _check_monitor(monitor_id, monitor):
+    latency_ms = -1
+
+    monitor_type = monitor.get("type", "")
+
+    if monitor_type == "proxy":
+        name = monitor.get("name", monitor_id.replace("proxy:", ""))
+        config = monitor.get("config", {})
+
+        is_up, latency_ms = _check_proxy(name, config)
+
+        return {
+            "monitor_id": monitor_id,
+            "is_up": is_up,
+            "latency_ms": latency_ms,
+            "display_name": name,
+            "alert_title": "PROXY MONITOR ALERT",
+        }
+
+    if monitor_type == "website":
+        configuration = monitor.get("configuration")
+
+        if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
+            logger.warning(
+                f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
+            )
+            return None
+
+        is_up, latency_ms = _check_website(configuration)
+
+        return {
+            "monitor_id": monitor_id,
+            "is_up": is_up,
+            "latency_ms": latency_ms,
+            "display_name": monitor.get("name", monitor_id),
+            "alert_title": "WEBSITE UPTIME MONITOR ALERT",
+        }
+
+    logger.warning(f"Skipping unknown monitor type for {monitor_id}: {monitor_type}")
+    return None
+
 
 
 
@@ -220,85 +261,57 @@ def _background_monitor_loop ( context ):
     except BlockingIOError:
         return
     # Monitor Loop
+
+
+
     while True:
-        # Read Monitors
         monitors = _read_monitors()
 
+        with ThreadPoolExecutor(max_workers=min(10, len(monitors))) as executor:
+            futures = [
+                executor.submit(_check_monitor, monitor_id, monitor)
+                for monitor_id, monitor in monitors.items()
+            ]
 
+            for future in as_completed(futures):
+                result = future.result()
 
-
-        for monitor_id, info in list(monitors.items()):
-
-
-            if not isinstance(info, dict):
-                logger.warning(f"Skipping malformed monitor: {monitor_id}")
-                continue
-        
-            logger.info(f"TYPE: {info.get('type')}")
-
-            if monitor_id.startswith("proxy:"):
-                monitor_type = "proxy"
-            else:
-                monitor_type = info.get("type", "website")
-
-
-
-
-            latency_ms = -1
-
-            if monitor_type == "proxy":
-                name = info.get("name", monitor_id.replace("proxy:", ""))
-                config = info.get("config", {})
-
-                is_up, latency_ms = _check_proxy(name, config)
-                display_name = name
-                alert_title = "PROXY MONITOR ALERT"
-
-            elif monitor_type == "website":
-                configuration = info.get("configuration")
-
-                if not isinstance(configuration, str) or not configuration.startswith(("http://", "https://")):
-                    logger.warning(
-                        f"Skipping invalid website monitor configuration for {monitor_id}: {configuration}"
-                    )
+                if result is None:
                     continue
 
-                is_up, latency_ms = _check_website(configuration)
-                display_name = info.get("name", monitor_id)
-                alert_title = "WEBSITE UPTIME MONITOR ALERT"
+                monitor_id = result["monitor_id"]
+                is_up = result["is_up"]
+                latency_ms = result["latency_ms"]
+                display_name = result["display_name"]
+                alert_title = result["alert_title"]
 
-            else:
-                logger.warning(f"Skipping unknown monitor type for {monitor_id}: {monitor_type}")
-                continue
+                monitor = monitors[monitor_id]
 
-            current_status = "UP" if is_up else "DOWN"
-            old_status = info.get("last_status", "UNKNOWN")
+                current_status = "UP" if is_up else "DOWN"
+                old_status = monitor.get("last_status", "UNKNOWN")
 
-            _record_ping(monitors[monitor_id], latency_ms)
+                _record_ping(monitor, latency_ms)
 
+                if current_status != old_status:
+                    monitor["last_status"] = current_status
 
-            if current_status != old_status:
-                monitors[monitor_id]["last_status"] = current_status
-
-                logger.info(
-                    f"Monitor status changed for {display_name}: "
-                    f"{old_status} -> {current_status}"
-                )
-
-                if old_status != "UNKNOWN":
-                    alert_icon = "🟢" if is_up else "🔴"
-
-                    alert_msg = (
-                        f"{alert_icon} **{alert_title}**\n\n"
-                        f"**{display_name}** went from "
-                        f"**{old_status}** ➡️ **{current_status}**!"
+                    logger.info(
+                        f"Monitor status changed for {display_name}: "
+                        f"{old_status} -> {current_status}"
                     )
 
-                    _send_alert(context, "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh", alert_msg)
+                    if old_status != "UNKNOWN":
+                        alert_icon = "🟢" if is_up else "🔴"
+
+                        alert_msg = (
+                            f"{alert_icon} **{alert_title}**\n\n"
+                            f"**{display_name}** went from "
+                            f"**{old_status}** ➡️ **{current_status}**!"
+                        )
+
+                        _send_alert(context, "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh", alert_msg)
 
         _write_monitors(monitors)
-
-
 
         time.sleep(60)
 
