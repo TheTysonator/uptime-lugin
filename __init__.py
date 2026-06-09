@@ -50,45 +50,37 @@ def _check_proxy ( configuration ):
     # Variables
     proxy_configuration_file = None
     proxy_process = None
+    # Create Temporary Configuration File
+    with tempfile.NamedTemporaryFile(mode = "w", suffix = ".json", delete = False, encoding = "utf-8") as f:
+        f.write(configuration)
+        proxy_configuration_file = f.name
+    # Start Proxy Process
+    proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    # Wait For Proxy To Start
 
 
 
 
-
-    try:
-
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            suffix=".json",
-            delete=False,
-            encoding="utf-8",
-        ) as f:
-            f.write(configuration)
-            proxy_configuration_file = f.name
-
-        proxy_process = subprocess.Popen(
-            ["hiddify-core", "run", "-c", proxy_configuration_file],
+    for _ in range(20):
+        result = subprocess.run(
+            ["bash", "-lc", f"ss -ltn | grep -q ':{12334} '"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
 
-        for _ in range(30):
-            result = subprocess.run(
-                ["bash", "-lc", f"ss -ltn | grep -q ':{12334} '"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+        if result.returncode == 0:
+            break
 
-            if result.returncode == 0:
-                break
+        time.sleep(0.25)
+    else:
+        stdout, stderr = proxy_process.communicate(timeout=1) if proxy_process.poll() is not None else ("", "")
+        logger.error("Hiddify did not open port. stdout=%s stderr=%s", stdout, stderr)
+        return -2
+    
 
-            time.sleep(1)
-        else:
-            stdout, stderr = proxy_process.communicate(timeout=1) if proxy_process.poll() is not None else ("", "")
-            logger.error("Hiddify did not open port. stdout=%s stderr=%s", stdout, stderr)
-            return -2
 
-        time.sleep(2)
+    try:
+
 
         start_time = time.time()
 
@@ -100,7 +92,7 @@ def _check_proxy ( configuration ):
                 "--fail",
                 "--location",
                 "--retry",
-                "2",
+                "4",
                 "--retry-delay",
                 "1",
                 "--connect-timeout",
@@ -161,8 +153,6 @@ def _check_monitor ( monitor_id, monitor ):
     elif monitor.get("type", "") == "proxy":
         # Proxy Check
         ping = _check_proxy(monitor.get("configuration", ""))
-
-    logger.error(f"JHDFKLJHFDJKFHDJKSFHLSA: {monitor.get('configuration', '')} {ping}")
     # Return Check Data
     return {
         "id": monitor_id,
@@ -180,6 +170,8 @@ def _background_monitor_loop ( context ):
         return
     # Monitor Loop
     while True:
+        # Wait
+        time.sleep(60 - (time.time() % 60))
         # Read Monitors
         monitors = _read_monitors()
         # No Monitors
@@ -214,8 +206,6 @@ def _background_monitor_loop ( context ):
                     })
         # Write Updated Monitors
         _write_monitors(monitors)
-        # Wait
-        time.sleep(60 - (time.time() % 60))
 
 
 
