@@ -29,15 +29,20 @@ from .tools import ADD_MONITOR_SCHEMA, REMOVE_MONITOR_SCHEMA, LIST_MONITORS_SCHE
 def _check_website ( configuration ):
     # Start Time
     start_time = time.time()
-    # Make Request
-    with urllib.request.urlopen(urllib.request.Request(configuration, headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" }), timeout = 10) as response:
-        # Ping
-        ping = int((time.time() - start_time) * 1000)
-        # Return Ping
-        if 200 <= response.status < 300:
-            return ping
-        else:
-            return -1
+    # Catch Errors
+    try:
+        # Make Request
+        with urllib.request.urlopen(urllib.request.Request(configuration, headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" }), timeout = 10) as response:
+            # Ping
+            ping = int((time.time() - start_time) * 1000)
+            # Return Ping
+            if 200 <= response.status < 300:
+                return ping
+            else:
+                return -1
+    except Exception:
+        # Website Down
+        return -1
 
 
 
