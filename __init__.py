@@ -47,38 +47,31 @@ def _check_website ( configuration ):
 
 # Check Proxy
 def _check_proxy ( configuration ):
+    # Variables
+    proxy_configuration_file = None
+    proxy_process = None
+    # Create Temporary Configuration File
+    with tempfile.NamedTemporaryFile(mode = "w", suffix = ".json", delete = False, encoding = "utf-8") as f:
+        f.write(configuration)
+        proxy_configuration_file = f.name
+    # Start Proxy Process
+    proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+    # Wait For Proxy To Start
+    for _ in range(20):
+        if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
+            break
+        time.sleep(0.25)
+    else:
+        # Proxy Failed To Start
+        return -2
+    # Start Time
+    start_time = time.time()
+
+
+
 
 
     try:
-
-
-        # Variables
-        proxy_configuration_file = None
-        proxy_process = None
-        # Create Temporary Configuration File
-        with tempfile.NamedTemporaryFile(mode = "w", suffix = ".json", delete = False, encoding = "utf-8") as f:
-            f.write(configuration)
-            proxy_configuration_file = f.name
-        # Start Proxy Process
-        proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-        # Wait For Proxy To Start
-        for _ in range(20):
-            if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
-                break
-            time.sleep(0.25)
-        else:
-            # Proxy Failed To Start
-
-            logger.error("Proxy failed to start within the expected time frame.")
-            logger.error(f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '")
-            return -2
-        # Start Time
-        start_time = time.time()
-    
-
-
-
-
 
         
 
