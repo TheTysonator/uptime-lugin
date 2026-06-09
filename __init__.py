@@ -59,9 +59,11 @@ def _check_proxy ( configuration ):
         # Start Time
         start_time = time.time()
         # Make Request
-        if subprocess.run(["curl", "--silent", "--fail", "--location", "--retry", "1", "--retry-delay", "1", "--connect-timeout", "10", "--proxy", f"socks5h://{ json.loads(configuration).get('inbounds', [{}])[0].get('listen', '') }:{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') }", "https://1.1.1.1/cdn-cgi/trace"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode != 0:
+        if subprocess.run(["curl", "--silent", "--fail", "--location", "--retry", "1", "--retry-delay", "1", "--connect-timeout", "10", "--proxy", f"socks5h://{ json.loads(configuration).get('inbounds', [{}])[0].get('listen', '') }:{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') }", "https://1.1.1.1/cdn-cgi/trace"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
             # Return Ping
             return int((time.time() - start_time) * 1000)
+        else:
+            return -1
     except Exception as e:
         logger.error(f"Error occurred while checking proxy: {e}")
     finally:
