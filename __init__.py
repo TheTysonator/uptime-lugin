@@ -146,6 +146,8 @@ def _check_monitor ( monitor_id, monitor ):
     elif monitor.get("type", "") == "proxy":
         # Proxy Check
         ping = _check_proxy(monitor.get("configuration", ""))
+    
+    logger.info(f"Checked monitor {monitor_id} with type {monitor.get('type', '')} and got ping {ping}")
     # Return Check Data
     return {
         "id": monitor_id,
