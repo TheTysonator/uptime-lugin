@@ -223,7 +223,7 @@ def _background_monitor_loop ( context ):
                             "message": (
                                 f"{ '🟢' if monitor_ping >= 0 else '🔴' } ",
                                 "**Monitoring Alert** ",
-                                f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
+                                f"For **"
                             )
                         })
                 else:
@@ -233,7 +233,7 @@ def _background_monitor_loop ( context ):
                         "message": (
                             f"{ '🟢' if monitor_ping >= 0 else '🔴' } ",
                             "**Monitoring Alert** ",
-                            f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
+                            f"For **"
                         )
                     })
         # Write Updated Monitors
