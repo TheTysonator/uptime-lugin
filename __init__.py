@@ -13,6 +13,8 @@ import urllib.request
 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -238,7 +240,8 @@ def _background_monitor_loop ( context ):
                                 f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                             )
                         })
-                except Exception:
+                except Exception as error:
+                    logger.error(f"Error processing monitor check result: {error}")
                     continue
         # Write Updated Monitors
         _write_monitors(monitors)
