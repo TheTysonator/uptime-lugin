@@ -99,6 +99,9 @@
             return () => clearInterval(interval);
         }, []);
 
+
+
+        // Remove These
         function getMonitorName(monitorId, monitorInfo) {
             if (monitorInfo && monitorInfo.name) return monitorInfo.name;
             if (monitorInfo && monitorInfo.url) return monitorInfo.url;
@@ -113,6 +116,9 @@
             const history = monitorInfo && Array.isArray(monitorInfo.ping_history) ? monitorInfo.ping_history : [];
             return history.slice(-30);
         }
+
+
+
 
         function renderLatencyGraph(pingHistory) {
             const graphWidth = 160;
