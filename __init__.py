@@ -13,8 +13,7 @@ import urllib.request
 from .utils import _write_monitors, _read_monitors, _get_lock_path
 from .tools import ADD_MONITOR_SCHEMA, REMOVE_MONITOR_SCHEMA, LIST_MONITORS_SCHEMA, _handle_add_monitor, _handle_remove_monitor, _handle_list_monitors
 
-import logging
-logger = logging.getLogger(__name__)
+
 
 # Check Website
 def _check_website ( configuration ):
@@ -64,8 +63,6 @@ def _check_proxy ( configuration ):
             return int((time.time() - start_time) * 1000)
         else:
             return -1
-    except Exception as e:
-        logger.error(f"Error occurred while checking proxy: {e}")
     finally:
         # Cleanup Proxy Process
         if proxy_process:
