@@ -1,5 +1,11 @@
-(function () {
-    "use strict";
+// Strict Mode
+"use strict";
+
+// Page Code
+(() => {
+
+
+
 
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;

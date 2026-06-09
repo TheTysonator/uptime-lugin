@@ -1,61 +1,10 @@
-Finish Saturday: __init__.py
 Finish Sunday: index.js
 
 dashboard/dist/index.js
-
-__init__.py
 this
 
 
 
 
-import
-check proxy
-
-new proxy
-remove logs
-change web check to use curl
-
-
 fix write monitors bug
 choose room
-potentially change name of proxy
-
-
-
-FINAL TEST
-
-linux only and requires curl to be installed
-
-
-
-{
-  "outbounds": [
-    {
-      "type": "vless",
-      "tag": "Microsoft_Poland_Cloud § 0",
-      "server": "20.215.186.174",
-      "server_port": 443,
-      "uuid": "103D0211-21F1-408D-8D8D-B3166E8B1719",
-      "tls": {
-        "enabled": true,
-        "server_name": "www.microsoft.com",
-        "utls": {
-          "enabled": true,
-          "fingerprint": "chrome"
-        },
-        "reality": {
-          "enabled": true,
-          "public_key": "WYsQNt47jd2yzFXQtbH5lnFO5IeGG2a_7WsoFKc-gGY",
-          "short_id": "b03a4e49"
-        }
-      },
-      "transport": {
-        "type": "xhttp",
-        "mode": "stream-one",
-        "path": "msdownload/update/v3/static/trustedr/en/"
-      },
-      "packet_encoding": "xudp"
-    }
-  ]
-}

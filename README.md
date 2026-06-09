@@ -12,7 +12,7 @@ The plugin allows Hermes to:
 ## Features
 
 - Website monitoring
-- Proxy monitoring
+- Socks5h proxy monitoring with Hiddify
 - Application grouping
 - Historical ping data
 - Hermes tool integration
@@ -35,6 +35,24 @@ Install it from the plugins tab in your Hermes Agent dashboard or place the plug
 ```bash
 ~/.hermes/plugins/monitoring
 ```
+
+
+
+### Requirements
+
+This plugin requires the following commands to be installed and available in your system `PATH`:
+
+- `curl` — used for proxy connectivity checks.
+- `hiddify-core` — used for connecting to the proxy.
+
+You can verify they are installed by running:
+
+```bash
+curl --version
+hiddify-core version
+```
+
+If either command is missing, proxy monitoring checks will fail.
 
 
 
