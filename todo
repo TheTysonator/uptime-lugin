@@ -13,6 +13,7 @@ import
 check proxy
 
 new proxy
+remove logs
 
 
 fix write monitors bug

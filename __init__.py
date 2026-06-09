@@ -54,51 +54,8 @@ def _check_proxy ( configuration ):
 
 
 
-
     try:
 
-        runtime_config = {
-            "log": {"level": "info"},
-            "inbounds": [
-                {
-                    "type": "socks",
-                    "tag": "socks-in",
-                    "listen": "127.0.0.1",
-                    "listen_port": 12334,
-                }
-            ],
-            "outbounds": [
-                {
-                "type": "vless",
-                "tag": "Microsoft_Poland_Cloud § 0",
-                "server": "20.215.186.174",
-                "server_port": 443,
-                "uuid": "103D0211-21F1-408D-8D8D-B3166E8B1719",
-                "tls": {
-                    "enabled": True,
-                    "server_name": "www.microsoft.com",
-                    "utls": {
-                    "enabled": True,
-                    "fingerprint": "chrome"
-                    },
-                    "reality": {
-                    "enabled": True,
-                    "public_key": "WYsQNt47jd2yzFXQtbH5lnFO5IeGG2a_7WsoFKc-gGY",
-                    "short_id": "b03a4e49"
-                    }
-                },
-                "transport": {
-                    "type": "xhttp",
-                    "mode": "stream-one",
-                    "path": "msdownload/update/v3/static/trustedr/en/"
-                },
-                "packet_encoding": "xudp"
-                }
-            ],
-            "route": {
-                "final": "Microsoft_Poland_Cloud § 0",
-            },
-        }
 
         with tempfile.NamedTemporaryFile(
             mode="w",
@@ -106,7 +63,7 @@ def _check_proxy ( configuration ):
             delete=False,
             encoding="utf-8",
         ) as f:
-            json.dump(runtime_config, f)
+            json.dump(configuration, f)
             proxy_configuration_file = f.name
 
         proxy_process = subprocess.Popen(
