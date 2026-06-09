@@ -241,7 +241,7 @@ def _background_monitor_loop ( context ):
                             )
                         })
                 except Exception as error:
-                    logger.error(f"Error processing monitor check result: {error}")
+                    logger.error(f"Error processing monitor check result: {error} {future.result()}")
                     continue
         # Write Updated Monitors
         _write_monitors(monitors)
