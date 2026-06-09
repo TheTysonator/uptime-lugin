@@ -2,6 +2,7 @@
 import fcntl
 import json
 import pathlib
+import socket
 import subprocess
 import tempfile
 import threading
@@ -44,21 +45,20 @@ def _check_website ( configuration ):
         # Website Down
         return -1
 
+# Check Proxy
+def _check_proxy ( configuration ):
 
 
-
-
-
-
-
-def _check_proxy(configuration):
-    test_url = configuration.get("test_url", "https://api.ipify.org")
-    socks_port = int(configuration.get("socks_port", 12334))
 
     temp_path = None
     proc = None
 
     try:
+        # Get free local SOCKS port
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind(("127.0.0.1", 0))
+            socks_port = sock.getsockname()[1]
+
         outbounds = configuration.get("outbounds", [])
 
         if not outbounds:
@@ -135,7 +135,7 @@ def _check_proxy(configuration):
                 "25",
                 "--proxy",
                 f"socks5h://127.0.0.1:{socks_port}",
-                test_url,
+                "https://1.1.1.1/cdn-cgi/trace",
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -146,7 +146,6 @@ def _check_proxy(configuration):
 
         if result.returncode != 0:
             return -2
-
 
         return latency_ms
 
@@ -208,7 +207,7 @@ def _background_monitor_loop ( context ):
         monitors = _read_monitors()
         # No Monitors
         if not monitors:
-            time.sleep(60)
+            time.sleep(60 - (time.time() % 60))
             continue
         # Thread Pool Executor
         with ThreadPoolExecutor(max_workers = min(10, len(monitors))) as executor:
@@ -239,7 +238,7 @@ def _background_monitor_loop ( context ):
         # Write Updated Monitors
         _write_monitors(monitors)
         # Wait
-        time.sleep(60)
+        time.sleep(60 - (time.time() % 60))
 
 
 
