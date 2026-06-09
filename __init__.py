@@ -54,8 +54,8 @@ def _check_proxy ( configuration ):
 
 
 
-    try:
 
+    try:
 
         with tempfile.NamedTemporaryFile(
             mode="w",
@@ -63,7 +63,7 @@ def _check_proxy ( configuration ):
             delete=False,
             encoding="utf-8",
         ) as f:
-            json.dump(configuration, f)
+            f.write(configuration)
             proxy_configuration_file = f.name
 
         proxy_process = subprocess.Popen(
