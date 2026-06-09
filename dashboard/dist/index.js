@@ -95,7 +95,7 @@
 
         useEffect(() => {
             getMonitors();
-            const interval = setInterval(getMonitors, 15000);
+            const interval = setInterval(getMonitors, 5000);
             return () => clearInterval(interval);
         }, []);
 
