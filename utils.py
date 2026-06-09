@@ -61,7 +61,7 @@ def _add_monitor ( monitors, application, name, monitor_type, configuration ):
         "name": name.strip(),
         "type": monitor_type,
         "configuration": configuration.strip(),
-        "ping_history": [-1] * 30
+        "ping_history": [-2] * 30
     }
     # Return Monitors
     return monitors, ""

@@ -231,7 +231,7 @@ def _background_monitor_loop ( context ):
                     if len(ping_history) >= 2:
                         if (monitor_ping >= 0 and ping_history[-2] < 0) or (monitor_ping < 0 and ping_history[-2] >= 0):
                             # Send Alert
-                            context.dispatch_tool("send_message", {
+                            result = context.dispatch_tool("send_message", {
                                 "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
                                 "message": (
                                     f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
@@ -239,9 +239,10 @@ def _background_monitor_loop ( context ):
                                     f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                                 )
                             })
+                            logger.error(f"MESSAGE: {result}")
                     else:
                         # Send Alert
-                        context.dispatch_tool("send_message", {
+                        result = context.dispatch_tool("send_message", {
                             "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
                             "message": (
                                 f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
@@ -249,6 +250,7 @@ def _background_monitor_loop ( context ):
                                 f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                             )
                         })
+                        logger.error(f"MESSAGE: {result}")
                 except Exception as error:
                     logger.error(f"Error processing monitor check result: {error} {future.result()}")
                     continue
