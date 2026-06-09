@@ -47,27 +47,16 @@ def _check_website ( configuration ):
 
 # Check Proxy
 def _check_proxy ( configuration ):
+    # Variables
+    proxy_configuration_file = None
+    proxy_process = None
 
 
 
 
-
-
-    socks_port = int(configuration.get("socks_port", 12334))
-
-    temp_path = None
-    proc = None
 
     try:
         outbounds = configuration.get("outbounds", [])
-
-        if not outbounds:
-            raise ValueError("Proxy config has no outbounds")
-
-        final_tag = outbounds[0].get("tag")
-
-        if not final_tag:
-            raise ValueError("First proxy outbound has no tag")
 
         runtime_config = {
             "log": {"level": "info"},
@@ -76,12 +65,39 @@ def _check_proxy ( configuration ):
                     "type": "socks",
                     "tag": "socks-in",
                     "listen": "127.0.0.1",
-                    "listen_port": socks_port,
+                    "listen_port": 12334,
                 }
             ],
-            "outbounds": outbounds,
+            "outbounds": [
+                {
+                "type": "vless",
+                "tag": "Microsoft_Poland_Cloud § 0",
+                "server": "20.215.186.174",
+                "server_port": 443,
+                "uuid": "103D0211-21F1-408D-8D8D-B3166E8B1719",
+                "tls": {
+                    "enabled": True,
+                    "server_name": "www.microsoft.com",
+                    "utls": {
+                    "enabled": True,
+                    "fingerprint": "chrome"
+                    },
+                    "reality": {
+                    "enabled": True,
+                    "public_key": "WYsQNt47jd2yzFXQtbH5lnFO5IeGG2a_7WsoFKc-gGY",
+                    "short_id": "b03a4e49"
+                    }
+                },
+                "transport": {
+                    "type": "xhttp",
+                    "mode": "stream-one",
+                    "path": "msdownload/update/v3/static/trustedr/en/"
+                },
+                "packet_encoding": "xudp"
+                }
+            ],
             "route": {
-                "final": final_tag,
+                "final": "Microsoft_Poland_Cloud § 0",
             },
         }
 
@@ -92,17 +108,17 @@ def _check_proxy ( configuration ):
             encoding="utf-8",
         ) as f:
             json.dump(runtime_config, f)
-            temp_path = f.name
+            proxy_configuration_file = f.name
 
-        proc = subprocess.Popen(
-            ["hiddify-core", "run", "-c", temp_path],
+        proxy_process = subprocess.Popen(
+            ["hiddify-core", "run", "-c", proxy_configuration_file],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
 
         for _ in range(30):
             result = subprocess.run(
-                ["bash", "-lc", f"ss -ltn | grep -q ':{socks_port} '"],
+                ["bash", "-lc", f"ss -ltn | grep -q ':{12334} '"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -134,7 +150,7 @@ def _check_proxy ( configuration ):
                 "--max-time",
                 "25",
                 "--proxy",
-                f"socks5h://127.0.0.1:{socks_port}",
+                f"socks5h://127.0.0.1:{12334}",
                 "https://1.1.1.1/cdn-cgi/trace",
             ],
             stdout=subprocess.PIPE,
@@ -154,17 +170,17 @@ def _check_proxy ( configuration ):
         return -2
 
     finally:
-        if proc:
-            proc.terminate()
+        if proxy_process:
+            proxy_process.terminate()
 
             try:
-                proc.wait(timeout=5)
+                proxy_process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                proc.kill()
+                proxy_process.kill()
 
-        if temp_path:
+        if proxy_configuration_file:
             try:
-                pathlib.Path(temp_path).unlink(missing_ok=True)
+                pathlib.Path(proxy_configuration_file).unlink(missing_ok=True)
             except Exception:
                 pass
 
