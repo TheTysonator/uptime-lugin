@@ -56,7 +56,6 @@ def _check_proxy ( configuration ):
 
 
     try:
-        outbounds = configuration.get("outbounds", [])
 
         runtime_config = {
             "log": {"level": "info"},
