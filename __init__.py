@@ -149,7 +149,8 @@ def _check_proxy ( configuration ):
 
         return latency_ms
 
-    except Exception:
+    except Exception as error:
+        logger.error(f"Error occurred while checking proxy: {error}")
         return -2
 
     finally:
