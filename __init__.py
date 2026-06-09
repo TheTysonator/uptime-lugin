@@ -128,6 +128,8 @@ def _check_proxy ( configuration ):
 
             time.sleep(1)
         else:
+            stdout, stderr = proxy_process.communicate(timeout=1) if proxy_process.poll() is not None else ("", "")
+            logger.error("Hiddify did not open port. stdout=%s stderr=%s", stdout, stderr)
             return -2
 
         time.sleep(2)
@@ -161,6 +163,7 @@ def _check_proxy ( configuration ):
         latency_ms = int((time.time() - start_time) * 1000)
 
         if result.returncode != 0:
+            logger.error("Curl failed. returncode=%s stderr=%s stdout=%s", result.returncode, result.stderr, result.stdout)
             return -2
 
 
