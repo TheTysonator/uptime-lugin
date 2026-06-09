@@ -1,24 +1,13 @@
 # Standard Imports
+import concurrent.futures
 import fcntl
 import json
 import pathlib
-import socket
 import subprocess
 import tempfile
 import threading
 import time
 import urllib.request
-
-
-
-
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import logging
-logger = logging.getLogger(__name__)
-
-
-
 
 # Custom Imports 
 from .utils import _write_monitors, _read_monitors, _get_lock_path
@@ -47,89 +36,45 @@ def _check_website ( configuration ):
 
 # Check Proxy
 def _check_proxy ( configuration ):
-    # Variables
-    proxy_configuration_file = None
-    proxy_process = None
-    # Create Temporary Configuration File
-    with tempfile.NamedTemporaryFile(mode = "w", suffix = ".json", delete = False, encoding = "utf-8") as f:
-        f.write(configuration)
-        proxy_configuration_file = f.name
-    # Start Proxy Process
-    proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-    # Wait For Proxy To Start
-    for _ in range(20):
-        if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
-            break
-        time.sleep(0.25)
-    else:
-        # Proxy Failed To Start
-        return -2
-    # Start Time
-    start_time = time.time()
-
-
-
-
-
+    # Try
     try:
-
-        
-
-        result = subprocess.run(
-            [
-                "curl",
-                "--silent",
-                "--show-error",
-                "--fail",
-                "--location",
-                "--retry",
-                "4",
-                "--retry-delay",
-                "1",
-                "--connect-timeout",
-                "10",
-                "--max-time",
-                "25",
-                "--proxy",
-                f"socks5h://127.0.0.1:{json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '')}",
-                "https://1.1.1.1/cdn-cgi/trace",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-
-        latency_ms = int((time.time() - start_time) * 1000)
-
-        if result.returncode != 0:
-            logger.error("Curl failed. returncode=%s stderr=%s stdout=%s", result.returncode, result.stderr, result.stdout)
+        # Variables
+        proxy_configuration_file = None
+        proxy_process = None
+        # Create Temporary Configuration File
+        with tempfile.NamedTemporaryFile(mode = "w", suffix = ".json", delete = False, encoding = "utf-8") as f:
+            f.write(configuration)
+            proxy_configuration_file = f.name
+        # Start Proxy Process
+        proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+        # Wait For Proxy To Start
+        for _ in range(20):
+            if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
+                break
+            time.sleep(0.25)
+        else:
+            # Proxy Failed To Start
             return -2
-
-
-        return latency_ms
-
-    except Exception as error:
-        logger.error(f"PROXY ERROR: {error}")
-        return -2
-
+        # Start Time
+        start_time = time.time()
+        # Make Request
+        if subprocess.run(["curl", "--silent", "--fail", "--location", "--retry", "1", "--retry-delay", "1", "--connect-timeout", "10", "--proxy", f"socks5h://{ json.loads(configuration).get('inbounds', [{}])[0].get('listen', '') }:{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') }", "https://1.1.1.1/cdn-cgi/trace"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode != 0:
+            # Return Ping
+            return int((time.time() - start_time) * 1000)
     finally:
+        # Cleanup Proxy Process
         if proxy_process:
             proxy_process.terminate()
-
             try:
-                proxy_process.wait(timeout=5)
+                proxy_process.wait(timeout = 5)
             except subprocess.TimeoutExpired:
                 proxy_process.kill()
-
+        # Cleanup Proxy Configuration File
         if proxy_configuration_file:
             try:
-                pathlib.Path(proxy_configuration_file).unlink(missing_ok=True)
+                pathlib.Path(proxy_configuration_file).unlink(missing_ok = True)
             except Exception:
                 pass
-
-
-
-
 
 
 
@@ -170,11 +115,11 @@ def _background_monitor_loop ( context ):
             time.sleep(60 - (time.time() % 60))
             continue
         # Thread Pool Executor
-        with ThreadPoolExecutor(max_workers = min(10, len(monitors))) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers = min(10, len(monitors))) as executor:
             # Futures
             futures = [ executor.submit(_check_monitor, monitor_id, monitor) for monitor_id, monitor in monitors.items() ]
             # Process Results
-            for future in as_completed(futures):
+            for future in concurrent.futures.as_completed(futures):
                 # Get Result Data
                 monitor_id = future.result().get("id", "")
                 monitor_ping = future.result().get("ping", -2)
