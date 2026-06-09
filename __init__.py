@@ -181,7 +181,7 @@ def _check_monitor ( monitor_id, monitor ):
         # Proxy Check
         ping = _check_proxy(monitor.get("configuration", ""))
 
-    logger.error(f"JHDFKLJHFDJKFHDJKSFHLSA: {monitor.get("configuration", "")} {ping}")
+    logger.error(f"JHDFKLJHFDJKFHDJKSFHLSA: {monitor.get('configuration', '')} {ping}")
     # Return Check Data
     return {
         "id": monitor_id,
