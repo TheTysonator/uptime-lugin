@@ -171,6 +171,8 @@ def _check_proxy(configuration):
 
 # Check Monitor
 def _check_monitor ( monitor_id, monitor ):
+    # Ping
+    ping = -2
     # Checks
     if monitor.get("type", "") == "website":
         # Website Check
@@ -178,6 +180,8 @@ def _check_monitor ( monitor_id, monitor ):
     elif monitor.get("type", "") == "proxy":
         # Proxy Check
         ping = _check_proxy(monitor.get("configuration", ""))
+
+    logger.error(f"JHDFKLJHFDJKFHDJKSFHLSA: {monitor.get("configuration", "")} {ping}")
     # Return Check Data
     return {
         "id": monitor_id,
