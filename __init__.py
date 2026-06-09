@@ -63,14 +63,14 @@ def _check_proxy ( configuration ):
         proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
         # Wait For Proxy To Start
         for _ in range(20):
-            if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', '').get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
+            if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
                 break
             time.sleep(0.25)
         else:
             # Proxy Failed To Start
 
             logger.error("Proxy failed to start within the expected time frame.")
-            logger.error(f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', '').get('listen_port', '') } '")
+            logger.error(f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') } '")
             return -2
         # Start Time
         start_time = time.time()
@@ -98,7 +98,7 @@ def _check_proxy ( configuration ):
                 "--max-time",
                 "25",
                 "--proxy",
-                f"socks5h://127.0.0.1:{json.loads(configuration).get('inbounds', '').get('listen_port', '')}",
+                f"socks5h://127.0.0.1:{json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '')}",
                 "https://1.1.1.1/cdn-cgi/trace",
             ],
             stdout=subprocess.PIPE,
@@ -151,8 +151,6 @@ def _check_monitor ( monitor_id, monitor ):
     elif monitor.get("type", "") == "proxy":
         # Proxy Check
         ping = _check_proxy(monitor.get("configuration", ""))
-    
-    logger.info(f"Checked monitor {monitor_id} with type {monitor.get('type', '')} and got ping {ping}")
     # Return Check Data
     return {
         "id": monitor_id,
