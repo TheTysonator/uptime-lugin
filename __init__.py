@@ -50,15 +50,15 @@ def _check_proxy ( configuration ):
 
 
 
+
+
+
+    socks_port = int(configuration.get("socks_port", 12334))
+
     temp_path = None
     proc = None
 
     try:
-        # Get free local SOCKS port
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.bind(("127.0.0.1", 0))
-            socks_port = sock.getsockname()[1]
-
         outbounds = configuration.get("outbounds", [])
 
         if not outbounds:
@@ -147,10 +147,10 @@ def _check_proxy ( configuration ):
         if result.returncode != 0:
             return -2
 
+
         return latency_ms
 
-    except Exception as error:
-        logger.error(f"Error occurred while checking proxy: {error}")
+    except Exception:
         return -2
 
     finally:
