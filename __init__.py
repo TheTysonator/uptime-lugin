@@ -13,7 +13,8 @@ import urllib.request
 from .utils import _write_monitors, _read_monitors, _get_lock_path
 from .tools import ADD_MONITOR_SCHEMA, REMOVE_MONITOR_SCHEMA, LIST_MONITORS_SCHEMA, _handle_add_monitor, _handle_remove_monitor, _handle_list_monitors
 
-
+import logging
+logger = logging.getLogger(__name__)
 
 # Check Website
 def _check_website ( configuration ):
@@ -61,6 +62,8 @@ def _check_proxy ( configuration ):
         if subprocess.run(["curl", "--silent", "--fail", "--location", "--retry", "1", "--retry-delay", "1", "--connect-timeout", "10", "--proxy", f"socks5h://{ json.loads(configuration).get('inbounds', [{}])[0].get('listen', '') }:{ json.loads(configuration).get('inbounds', [{}])[0].get('listen_port', '') }", "https://1.1.1.1/cdn-cgi/trace"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode != 0:
             # Return Ping
             return int((time.time() - start_time) * 1000)
+    except Exception as e:
+        logger.error(f"Error occurred while checking proxy: {e}")
     finally:
         # Cleanup Proxy Process
         if proxy_process:
