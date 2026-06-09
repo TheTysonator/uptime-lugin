@@ -205,18 +205,30 @@ def _background_monitor_loop ( context ):
             futures = [ executor.submit(_check_monitor, monitor_id, monitor) for monitor_id, monitor in monitors.items() ]
             # Process Results
             for future in as_completed(futures):
-                # Get Result Data
-                monitor_id = future.result().get("id", "")
-                monitor_ping = future.result().get("ping", -2)
-                # Monitor
-                monitor = monitors[monitor_id]
-                # Update Monitor
-                ping_history = monitor.get("ping_history", [])
-                ping_history.append(monitor_ping)
-                monitor["ping_history"] = ping_history[-30:]
-                # Check Ping
-                if len(ping_history) >= 2:
-                    if (monitor_ping >= 0 and ping_history[-2] < 0) or (monitor_ping < 0 and ping_history[-2] >= 0):
+
+                try:
+                    # Get Result Data
+                    monitor_id = future.result().get("id", "")
+                    monitor_ping = future.result().get("ping", -2)
+                    # Monitor
+                    monitor = monitors[monitor_id]
+                    # Update Monitor
+                    ping_history = monitor.get("ping_history", [])
+                    ping_history.append(monitor_ping)
+                    monitor["ping_history"] = ping_history[-30:]
+                    # Check Ping
+                    if len(ping_history) >= 2:
+                        if (monitor_ping >= 0 and ping_history[-2] < 0) or (monitor_ping < 0 and ping_history[-2] >= 0):
+                            # Send Alert
+                            context.dispatch_tool("send_message", {
+                                "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
+                                "message": (
+                                    f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
+                                    "**Monitoring Alert** "
+                                    f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
+                                )
+                            })
+                    else:
                         # Send Alert
                         context.dispatch_tool("send_message", {
                             "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
@@ -226,16 +238,8 @@ def _background_monitor_loop ( context ):
                                 f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                             )
                         })
-                else:
-                    # Send Alert
-                    context.dispatch_tool("send_message", {
-                        "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
-                        "message": (
-                            f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
-                            "**Monitoring Alert** "
-                            f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
-                        )
-                    })
+                except Exception:
+                    continue
         # Write Updated Monitors
         _write_monitors(monitors)
         # Wait
