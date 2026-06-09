@@ -57,32 +57,22 @@ def _check_proxy ( configuration ):
     # Start Proxy Process
     proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
     # Wait For Proxy To Start
-
-
-
-
     for _ in range(20):
-        result = subprocess.run(
-            ["bash", "-lc", f"ss -ltn | grep -q ':{12334} '"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-        if result.returncode == 0:
+        if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get("inbounds", "").get("listen_port", "") } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
             break
-
         time.sleep(0.25)
     else:
-        stdout, stderr = proxy_process.communicate(timeout=1) if proxy_process.poll() is not None else ("", "")
-        logger.error("Hiddify did not open port. stdout=%s stderr=%s", stdout, stderr)
+        # Proxy Failed To Start
         return -2
+    # Start Time
+    start_time = time.time()
     
 
 
     try:
 
 
-        start_time = time.time()
+        
 
         result = subprocess.run(
             [
@@ -100,7 +90,7 @@ def _check_proxy ( configuration ):
                 "--max-time",
                 "25",
                 "--proxy",
-                f"socks5h://127.0.0.1:{12334}",
+                f"socks5h://127.0.0.1:{json.loads(configuration).get('inbounds', '').get('listen_port', '')}",
                 "https://1.1.1.1/cdn-cgi/trace",
             ],
             stdout=subprocess.PIPE,
