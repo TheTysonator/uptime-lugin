@@ -63,6 +63,9 @@ def _check_proxy ( configuration ):
         time.sleep(0.25)
     else:
         # Proxy Failed To Start
+
+        logger.error("Proxy failed to start within the expected time frame.")
+        logger.error(f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', '').get('listen_port', '') } '")
         return -2
     # Start Time
     start_time = time.time()
