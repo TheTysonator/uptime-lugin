@@ -221,9 +221,9 @@ def _background_monitor_loop ( context ):
                         context.dispatch_tool("send_message", {
                             "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
                             "message": (
-                                f"{ '🟢' if monitor_ping >= 0 else '🔴' } ",
-                                "**Monitoring Alert** ",
-                                f"For **"
+                                f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
+                                "**Monitoring Alert** "
+                                f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                             )
                         })
                 else:
@@ -231,9 +231,9 @@ def _background_monitor_loop ( context ):
                     context.dispatch_tool("send_message", {
                         "target": "matrix:!RCoAgzyLWmmeLSIfPF:hmx.sh",
                         "message": (
-                            f"{ '🟢' if monitor_ping >= 0 else '🔴' } ",
-                            "**Monitoring Alert** ",
-                            f"For **"
+                            f"{ '🟢' if monitor_ping >= 0 else '🔴' } "
+                            "**Monitoring Alert** "
+                            f"For *{ monitor.get('name', '') }* in *{ monitor.get('application', '') }*"
                         )
                     })
         # Write Updated Monitors
