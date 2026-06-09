@@ -43,7 +43,7 @@ Install it from the plugins tab in your Hermes Agent dashboard or place the plug
 This plugin requires the following commands to be installed and available in your system `PATH`:
 
 - `curl` — used for proxy connectivity checks.
-- `hiddify-core` — used for connecting to the proxy.
+- `hiddify-core` — used for connecting to a proxy.
 
 You can verify they are installed by running:
 
