@@ -7,11 +7,14 @@ __init__.py
 this
 
 import
-test and new proxy
 check proxy
-test
+
+new proxy
 
 fix write monitors bug
 choose room
-check sent messages
 sleep to rather than 60 seconds
+
+
+
+FINAL TEST
