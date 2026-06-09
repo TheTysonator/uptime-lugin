@@ -58,7 +58,7 @@ def _check_proxy ( configuration ):
     proxy_process = subprocess.Popen(["hiddify-core", "run", "-c", proxy_configuration_file], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
     # Wait For Proxy To Start
     for _ in range(20):
-        if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get("inbounds", "").get("listen_port", "") } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
+        if subprocess.run(["bash", "-lc", f"ss -ltn | grep -q ':{ json.loads(configuration).get('inbounds', '').get('listen_port', '') } '"], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL).returncode == 0:
             break
         time.sleep(0.25)
     else:
