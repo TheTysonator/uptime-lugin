@@ -1,14 +1,16 @@
 // Strict Mode
 "use strict";
 
-// Page Code
-(() => {
 
 
 
 
+    // Hermes Software Development Kit
     const SDK = window.__HERMES_PLUGIN_SDK__;
     const { React } = SDK;
+
+
+
     const { Card, CardHeader, CardTitle, CardContent, Button, Select, Badge } = SDK.components;
     const { useState, useEffect } = SDK.hooks;
 
@@ -101,21 +103,6 @@
 
 
 
-        // Remove These
-        function getMonitorName(monitorId, monitorInfo) {
-            if (monitorInfo && monitorInfo.name) return monitorInfo.name;
-            if (monitorInfo && monitorInfo.url) return monitorInfo.url;
-            return monitorId;
-        }
-
-        function getMonitorType(monitorInfo) {
-            return (monitorInfo && monitorInfo.type) ? monitorInfo.type : "website";
-        }
-
-        function getPingHistory(monitorInfo) {
-            const history = monitorInfo && Array.isArray(monitorInfo.ping_history) ? monitorInfo.ping_history : [];
-            return history.slice(-30);
-        }
 
 
 
@@ -473,8 +460,8 @@ React.createElement(Card, null,
                                     },
                                         monitorIdsForApp.map(function (monitorId) {
                                             const monitorInfo = monitorsSafe[monitorId] || {};
-                                            const monitorName = getMonitorName(monitorId, monitorInfo);
-                                            const monitorType = getMonitorType(monitorInfo);
+                                            const monitorName = monitorInfo.name;
+                                            const monitorType = monitorInfo.type;
                                             const status = monitorInfo.last_status || "UNKNOWN";
 
                                             const isUp = status === "UP";
@@ -483,7 +470,7 @@ React.createElement(Card, null,
                                             const badgeText = isUp ? "ONLINE" : (isDown ? "DOWN" : "UNKNOWN");
 
                                             const typeLabel = monitorType === "proxy" ? "Proxy" : "Website";
-                                            const pingHistory = getPingHistory(monitorInfo);
+                                            const pingHistory = monitorInfo.ping_history;
 
                                             return React.createElement("div", {
                                                 key: monitorId,
@@ -548,4 +535,3 @@ React.createElement(Card, null,
     }
 
     window.__HERMES_PLUGINS__.register("monitoring", PluginPage);
-})();
